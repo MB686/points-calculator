@@ -14,6 +14,7 @@
         button { width: 75%; padding: 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin: 20px auto 0; display: block; font-size: 18px; }
         button:hover { background-color: #45a049; }
         #clearButton { margin-top: 10px; }
+        #logButton { margin-top: 10px; display: none; }
         #result { margin: 20px auto 0; font-size: 18px; font-weight: bold; width: 75%; text-align: left; }
     </style>
 </head>
@@ -28,6 +29,7 @@
     <button onclick="calculatePoints()">Calculate</button>
     <button id="clearButton" onclick="clearFields()">Clear</button>
     <div id="result"></div>
+    <button id="logButton" onclick="logPoints()">Log It</button>
     <script>
         function calculatePoints() {
             const calories = parseFloat(document.getElementById('calories').value) || 0;
@@ -36,6 +38,8 @@
             const cappedFiber = Math.min(fiber, 4);
             const points = Math.round((calories / 50) + (fat / 12) - (cappedFiber / 5));
             document.getElementById('result').innerText = `Points: ${points}`;
+            document.getElementById('logButton').style.display = 'block';
+            localStorage.setItem('currentPoints', points);
         }
 
         function clearFields() {
@@ -43,6 +47,11 @@
             document.getElementById('fat').value = '';
             document.getElementById('fiber').value = '';
             document.getElementById('result').innerText = '';
+            document.getElementById('logButton').style.display = 'none';
+        }
+
+        function logPoints() {
+            window.location.href = 'log.html';
         }
     </script>
 </body>
