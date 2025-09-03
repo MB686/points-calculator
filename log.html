@@ -40,7 +40,7 @@
     <script>
         function loadLog() {
             const log = JSON.parse(localStorage.getItem('pointsLog') || '[]');
-            const dailyBudget = parseFloat(localStorage.getItem('dailyBudget') || '23');
+            const dailyBudget = parseFloat(localStorage.getItem('dailyBudget') || '49');
             const currentPoints = parseFloat(localStorage.getItem('currentPoints') || '0');
             document.getElementById('dailyBudget').value = dailyBudget;
             const logBody = document.getElementById('logBody');
@@ -64,13 +64,14 @@
                 document.getElementById('food').value = '';
                 localStorage.removeItem('currentPoints');
             }
-            const dailyBudget = parseFloat(document.getElementById('dailyBudget').value) || 23;
+            const dailyBudget = parseFloat(document.getElementById('dailyBudget').value) || 49;
             localStorage.setItem('dailyBudget', dailyBudget);
             loadLog();
         }
 
         function goBack() {
             window.location.href = 'index.html';
+            // Fallback: window.location.href = '/points-calculator/index.html';
         }
 
         window.onload = loadLog;
