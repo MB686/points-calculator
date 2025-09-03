@@ -31,6 +31,12 @@
     <div id="result"></div>
     <button id="logButton" onclick="logPoints()">Log It</button>
     <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/points-calculator/sw.js')
+                .then(() => console.log('Service Worker Registered'))
+                .catch(error => console.log('Service Worker Registration Failed:', error));
+        }
+
         function calculatePoints() {
             const calories = parseFloat(document.getElementById('calories').value) || 0;
             const fat = parseFloat(document.getElementById('fat').value) || 0;
@@ -51,7 +57,7 @@
         }
 
         function logPoints() {
-            window.location.href = 'log.html';
+            window.location.href = 'https://mb686.github.io/points-calculator/log.html';
         }
     </script>
 </body>
