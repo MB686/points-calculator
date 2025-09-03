@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weight Watchers Points Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px; }
+        label { display: block; margin: 10px 0 5px; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 20px; }
+        button:hover { background-color: #45a049; }
+        #result { margin-top: 20px; font-size: 18px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Weight Watchers Points Calculator</h1>
+    <p>This calculator uses the old Weight Watchers Points formula: Points = round((Calories / 50) + (Fat / 12) - (min(Fiber, 4) / 5)). Fiber is capped at 4 grams for accuracy based on the original system.<grok-card data-id="0ea762" data-type="citation_card"></grok-card></p>
+    
+    <label for="calories">Calories:</label>
+    <input type="number" id="calories" placeholder="Enter calories">
+    
+    <label for="fat">Fat (grams):</label>
+    <input type="number" id="fat" placeholder="Enter fat grams">
+    
+    <label for="fiber">Fiber (grams):</label>
+    <input type="number" id="fiber" placeholder="Enter fiber grams">
+    
+    <button onclick="calculatePoints()">Calculate</button>
+    
+    <div id="result"></div>
+    
+    <script>
+        function calculatePoints() {
+            const calories = parseFloat(document.getElementById('calories').value) || 0;
+            const fat = parseFloat(document.getElementById('fat').value) || 0;
+            const fiber = parseFloat(document.getElementById('fiber').value) || 0;
+            
+            const cappedFiber = Math.min(fiber, 4);
+            const points = Math.round((calories / 50) + (fat / 12) - (cappedFiber / 5));
+            
+            document.getElementById('result').innerText = `Points: ${points}`;
+        }
+    </script>
+</body>
+</html>
