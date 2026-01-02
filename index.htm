@@ -7,15 +7,80 @@
     <title>Weight Watchers Points Calculator</title>
     <link rel="apple-touch-icon" href="icon.png">
     <style>
-        body { font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px; }
-        h1 { width: 75%; margin: 0 auto; text-align: left; }
-        label { display: block; margin: 10px auto 5px; font-size: 18px; width: 75%; text-align: left; }
-        input { width: 75%; padding: 8px; box-sizing: border-box; margin: 0 auto; display: block; font-size: 16px; }
-        button { width: 75%; padding: 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin: 20px auto 0; display: block; font-size: 18px; }
-        button:hover { background-color: #45a049; }
-        #clearButton { margin-top: 10px; }
-        #result { margin: 20px auto 0; font-size: 18px; font-weight: bold; width: 75%; text-align: left; }
-    </style>
+    body { 
+        font-family: Arial, Helvetica, sans-serif; 
+        max-width: 400px; 
+        margin: 0 auto; 
+        padding: 20px; 
+        background-color: #f8f9fa; 
+    }
+    h1 { 
+        width: 80%; 
+        margin: 0 auto 25px; 
+        text-align: center; 
+        color: #333; 
+    }
+    label { 
+        display: block; 
+        margin: 12px auto 6px; 
+        font-size: 17px; 
+        font-weight: 600; 
+        width: 80%; 
+        color: #444; 
+    }
+    input { 
+        width: 80%; 
+        padding: 12px; 
+        box-sizing: border-box; 
+        margin: 0 auto; 
+        display: block; 
+        font-size: 17px; 
+        border: 2px solid #ccc; 
+        border-radius: 8px; 
+        background-color: white; 
+        transition: border-color 0.2s; 
+    }
+    input:focus { 
+        outline: none; 
+        border-color: #4CAF50; 
+        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2); 
+    }
+    input::placeholder { 
+        color: #aaa; 
+    }
+    button { 
+        width: 80%; 
+        padding: 14px; 
+        background-color: #4CAF50; 
+        color: white; 
+        border: none; 
+        border-radius: 8px; 
+        cursor: pointer; 
+        margin: 25px auto 12px; 
+        display: block; 
+        font-size: 18px; 
+        font-weight: bold; 
+    }
+    button:hover { 
+        background-color: #45a049; 
+    }
+    #clearButton { 
+        background-color: #f44336; 
+        margin-top: 10px; 
+    }
+    #clearButton:hover { 
+        background-color: #da190b; 
+    }
+    #result { 
+        margin: 30px auto 0; 
+        font-size: 22px; 
+        font-weight: bold; 
+        width: 80%; 
+        text-align: center; 
+        color: #2c3e50; 
+        min-height: 30px; 
+    }
+</style>
 </head>
 <body>
     <h1>Weight Watchers Points Calculator</h1>
