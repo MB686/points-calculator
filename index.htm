@@ -27,6 +27,13 @@ h2 {
   color: #333;
   font-size: 18px;
 }
+.section-hint {
+  width: 80%;
+  margin: -10px auto 15px;
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+}
 .section-divider {
   border-top: 2px solid #e0e0e0;
   width: 80%;
@@ -83,10 +90,10 @@ button:hover {
 #clearButton:hover {
   background-color: #da190b;
 }
-#addToTotalButton {
+#addToJournalButton {
   background-color: #2196F3;
 }
-#addToTotalButton:hover {
+#addToJournalButton:hover {
   background-color: #1976D2;
 }
 #resetDayButton {
@@ -185,7 +192,7 @@ button:hover {
 .delete-food-btn:hover {
   background-color: #da190b;
 }
-#noSavedFoods {
+#noJournalItems, #noSavedFoods {
   width: 80%;
   margin: 10px auto;
   text-align: center;
@@ -245,6 +252,9 @@ button:hover {
 
 <h1>Weight Watchers Points Calculator</h1>
 
+<label for="foodName">Food Name:</label>
+<input type="text" id="foodName" placeholder="e.g. Apple, Chicken Breast">
+
 <label for="calories">Calories:</label>
 <input type="number" id="calories" placeholder="Enter calories">
 
@@ -259,10 +269,10 @@ button:hover {
 
 <div id="result"></div>
 
-<button id="addToTotalButton" onclick="addToDailyTotal()">Add to Today's Total</button>
+<button id="addToJournalButton" onclick="addToJournal()">Add to Food Journal</button>
 
 <div class="section-divider"></div>
-<h2>Daily Points Tracker</h2>
+<h2>Today's Food Journal</h2>
 
 <label for="allowance">Daily Allowance:</label>
 <input type="number" id="allowance" placeholder="Enter daily points allowance">
@@ -271,15 +281,17 @@ button:hover {
   <div class="tracker-row"><span>Used Today:</span><span id="usedToday">0</span></div>
   <div class="tracker-row"><span>Remaining:</span><span id="remainingToday">0</span></div>
 </div>
+
+<div id="journalList"></div>
+<div id="noJournalItems">No foods logged yet today</div>
+
 <button id="resetDayButton" onclick="resetDay()">Reset Day</button>
 
 <div class="section-divider"></div>
 <h2>Saved Foods</h2>
+<p class="section-hint">Quickly add foods you eat often</p>
 
-<label for="foodName">Food Name:</label>
-<input type="text" id="foodName" placeholder="e.g. Apple, Chicken Breast">
-
-<button id="saveFoodButton" onclick="saveFood()">Save This Food</button>
+<button id="saveFoodButton" onclick="saveFood()">Save Current Food</button>
 
 <div id="savedFoodsList"></div>
 <div id="noSavedFoods">No saved foods yet</div>
@@ -309,10 +321,7 @@ if ('serviceWorker' in navigator) {
     .catch(error => console.log('Service Worker Registration Failed in index.html:', error));
 }
 
-/* ---------- Firebase setup ----------
-   Replace these values with the config from your Firebase project:
-   Project Settings -> General -> Your apps -> Web app -> SDK setup and configuration
-*/
+/* ---------- Firebase setup ---------- */
 const firebaseConfig = {
   apiKey: "AIzaSyDHdqTZVy3q56ZfzygZunPscViqA1utlzQ",
   authDomain: "points-calculator-c1eef.firebaseapp.com",
@@ -331,6 +340,8 @@ let unsubscribeSync = null;
 let isApplyingRemote = false;
 let saveTimeout = null;
 
+/* ---------- Calculator ---------- */
+
 function calculatePoints() {
   const calories = parseFloat(document.getElementById('calories').value) || 0;
   const fat = parseFloat(document.getElementById('fat').value) || 0;
@@ -344,6 +355,7 @@ function calculatePoints() {
 }
 
 function clearFields() {
+  document.getElementById('foodName').value = '';
   document.getElementById('calories').value = '';
   document.getElementById('fat').value = '';
   document.getElementById('fiber').value = '';
@@ -351,47 +363,121 @@ function clearFields() {
   lastCalculatedPoints = null;
 }
 
-/* ---------- Daily Points Tracker ---------- */
+/* ---------- Food Journal ---------- */
 
 function checkNewDay() {
   const today = new Date().toDateString();
   const storedDate = localStorage.getItem('wwDailyDate');
   if (storedDate !== today) {
-    localStorage.setItem('wwDailyTotal', '0');
+    localStorage.setItem('wwFoodJournal', '[]');
     localStorage.setItem('wwDailyDate', today);
   }
 }
 
+function getJournal() {
+  return JSON.parse(localStorage.getItem('wwFoodJournal') || '[]');
+}
+
+function setJournal(journal) {
+  localStorage.setItem('wwFoodJournal', JSON.stringify(journal));
+}
+
 function updateDailyDisplay() {
   const allowance = parseFloat(document.getElementById('allowance').value) || 0;
-  const total = parseFloat(localStorage.getItem('wwDailyTotal')) || 0;
-  const remaining = allowance - total;
+  const journal = getJournal();
+  const used = journal.reduce((sum, item) => sum + item.points, 0);
+  const remaining = allowance - used;
 
-  document.getElementById('usedToday').innerText = total;
+  document.getElementById('usedToday').innerText = used;
 
   const remainingEl = document.getElementById('remainingToday');
   remainingEl.innerText = remaining;
   remainingEl.className = remaining >= 0 ? 'remaining-ok' : 'remaining-over';
 }
 
-function addToDailyTotal() {
+function addToJournal() {
   if (lastCalculatedPoints === null) {
     alert('Calculate points first.');
     return;
   }
-  const total = (parseFloat(localStorage.getItem('wwDailyTotal')) || 0) + lastCalculatedPoints;
-  localStorage.setItem('wwDailyTotal', total);
+
+  const nameInput = document.getElementById('foodName');
+  const name = nameInput.value.trim() || 'Food';
+
+  const journal = getJournal();
+  journal.unshift({ name: name, points: lastCalculatedPoints });
+  setJournal(journal);
+
+  renderJournal();
+  updateDailyDisplay();
+  clearFields();
+  saveToCloud();
+}
+
+function deleteJournalEntry(index) {
+  const journal = getJournal();
+  journal.splice(index, 1);
+  setJournal(journal);
+  renderJournal();
   updateDailyDisplay();
   saveToCloud();
 }
 
 function resetDay() {
-  if (confirm("Reset today's total back to 0?")) {
-    localStorage.setItem('wwDailyTotal', '0');
+  if (confirm("Clear today's food journal and start fresh?")) {
+    setJournal([]);
     localStorage.setItem('wwDailyDate', new Date().toDateString());
+    renderJournal();
     updateDailyDisplay();
     saveToCloud();
   }
+}
+
+function renderJournal() {
+  const journal = getJournal();
+  const container = document.getElementById('journalList');
+  const emptyMessage = document.getElementById('noJournalItems');
+
+  container.innerHTML = '';
+
+  if (journal.length === 0) {
+    emptyMessage.style.display = 'block';
+    return;
+  }
+  emptyMessage.style.display = 'none';
+
+  journal.forEach((item, index) => {
+    const row = document.createElement('div');
+    row.className = 'food-list-item';
+
+    const info = document.createElement('div');
+    info.className = 'food-info';
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'food-name';
+    nameEl.innerText = item.name;
+
+    const pointsEl = document.createElement('span');
+    pointsEl.className = 'food-points';
+    pointsEl.innerText = `${item.points} pts`;
+
+    info.appendChild(nameEl);
+    info.appendChild(pointsEl);
+
+    const actions = document.createElement('div');
+    actions.className = 'food-actions';
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-food-btn';
+    deleteBtn.innerText = 'Delete';
+    deleteBtn.onclick = () => deleteJournalEntry(index);
+
+    actions.appendChild(deleteBtn);
+
+    row.appendChild(info);
+    row.appendChild(actions);
+    container.appendChild(row);
+  });
 }
 
 document.getElementById('allowance').addEventListener('input', function () {
@@ -400,7 +486,7 @@ document.getElementById('allowance').addEventListener('input', function () {
   saveToCloud();
 });
 
-/* ---------- Saved Foods ---------- */
+/* ---------- Saved Foods (favorites) ---------- */
 
 function getSavedFoods() {
   return JSON.parse(localStorage.getItem('wwSavedFoods') || '[]');
@@ -411,8 +497,7 @@ function setSavedFoods(foods) {
 }
 
 function saveFood() {
-  const nameInput = document.getElementById('foodName');
-  const name = nameInput.value.trim();
+  const name = document.getElementById('foodName').value.trim();
 
   if (!name) {
     alert('Enter a name for this food.');
@@ -427,7 +512,6 @@ function saveFood() {
   foods.push({ name: name, points: lastCalculatedPoints });
   setSavedFoods(foods);
 
-  nameInput.value = '';
   renderSavedFoods();
   saveToCloud();
 }
@@ -437,8 +521,11 @@ function addSavedFood(index) {
   const food = foods[index];
   if (!food) return;
 
-  const total = (parseFloat(localStorage.getItem('wwDailyTotal')) || 0) + food.points;
-  localStorage.setItem('wwDailyTotal', total);
+  const journal = getJournal();
+  journal.unshift({ name: food.name, points: food.points });
+  setJournal(journal);
+
+  renderJournal();
   updateDailyDisplay();
   saveToCloud();
 }
@@ -518,8 +605,8 @@ function generateSyncCode() {
 function getLocalState() {
   return {
     allowance: localStorage.getItem('wwDailyAllowance') || '',
-    dailyTotal: parseFloat(localStorage.getItem('wwDailyTotal')) || 0,
     dailyDate: localStorage.getItem('wwDailyDate') || '',
+    foodJournal: getJournal(),
     savedFoods: getSavedFoods()
   };
 }
@@ -531,11 +618,11 @@ function applyRemoteState(state) {
     localStorage.setItem('wwDailyAllowance', state.allowance);
     document.getElementById('allowance').value = state.allowance;
   }
-  if (state.dailyTotal !== undefined) {
-    localStorage.setItem('wwDailyTotal', state.dailyTotal);
-  }
   if (state.dailyDate !== undefined) {
     localStorage.setItem('wwDailyDate', state.dailyDate);
+  }
+  if (state.foodJournal !== undefined) {
+    setJournal(state.foodJournal);
   }
   if (state.savedFoods !== undefined) {
     setSavedFoods(state.savedFoods);
@@ -543,6 +630,7 @@ function applyRemoteState(state) {
 
   checkNewDay();
   updateDailyDisplay();
+  renderJournal();
   renderSavedFoods();
 
   isApplyingRemote = false;
@@ -627,6 +715,7 @@ if (savedAllowance !== null) {
 }
 
 updateDailyDisplay();
+renderJournal();
 renderSavedFoods();
 
 syncCode = localStorage.getItem('wwSyncCode');
