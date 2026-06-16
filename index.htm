@@ -192,6 +192,65 @@ button:hover {
 .delete-food-btn:hover {
   background-color: #da190b;
 }
+.edit-food-btn {
+  background-color: #2196F3;
+}
+.edit-food-btn:hover {
+  background-color: #1976D2;
+}
+.save-edit-btn {
+  background-color: #4CAF50;
+}
+.save-edit-btn:hover {
+  background-color: #45a049;
+}
+.cancel-edit-btn {
+  background-color: #9e9e9e;
+}
+.cancel-edit-btn:hover {
+  background-color: #7e7e7e;
+}
+.edit-row {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  border: 2px solid #2196F3;
+  border-radius: 8px;
+  padding: 12px;
+  width: 80%;
+  margin: 8px auto;
+  box-sizing: border-box;
+}
+.edit-row-inputs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.edit-name-input {
+  flex: 2;
+  width: auto;
+  margin: 0;
+  padding: 8px;
+  font-size: 15px;
+}
+.edit-points-input {
+  flex: 1;
+  width: auto;
+  margin: 0;
+  padding: 8px;
+  font-size: 15px;
+}
+.edit-row-actions {
+  display: flex;
+  gap: 6px;
+}
+.edit-row-actions button {
+  width: auto;
+  flex: 1;
+  margin: 0;
+  padding: 8px;
+  font-size: 14px;
+}
 #noJournalItems, #noSavedFoods {
   width: 80%;
   margin: 10px auto;
@@ -378,6 +437,8 @@ function getJournal() {
   return JSON.parse(localStorage.getItem('wwFoodJournal') || '[]');
 }
 
+let editingJournalIndex = null;
+
 function setJournal(journal) {
   localStorage.setItem('wwFoodJournal', JSON.stringify(journal));
 }
@@ -423,6 +484,42 @@ function deleteJournalEntry(index) {
   saveToCloud();
 }
 
+function editJournalEntry(index) {
+  editingJournalIndex = index;
+  renderJournal();
+}
+
+function cancelJournalEdit() {
+  editingJournalIndex = null;
+  renderJournal();
+}
+
+function saveJournalEdit(index) {
+  const nameInput = document.getElementById('editName-' + index);
+  const pointsInput = document.getElementById('editPoints-' + index);
+
+  const name = nameInput.value.trim();
+  const points = parseFloat(pointsInput.value);
+
+  if (!name) {
+    alert('Food name cannot be empty.');
+    return;
+  }
+  if (isNaN(points)) {
+    alert('Enter a valid points value.');
+    return;
+  }
+
+  const journal = getJournal();
+  journal[index] = { name: name, points: points };
+  setJournal(journal);
+
+  editingJournalIndex = null;
+  renderJournal();
+  updateDailyDisplay();
+  saveToCloud();
+}
+
 function resetDay() {
   if (confirm("Clear today's food journal and start fresh?")) {
     setJournal([]);
@@ -447,6 +544,50 @@ function renderJournal() {
   emptyMessage.style.display = 'none';
 
   journal.forEach((item, index) => {
+    if (editingJournalIndex === index) {
+      const editRow = document.createElement('div');
+      editRow.className = 'edit-row';
+
+      const inputsRow = document.createElement('div');
+      inputsRow.className = 'edit-row-inputs';
+
+      const nameInput = document.createElement('input');
+      nameInput.className = 'edit-name-input';
+      nameInput.id = 'editName-' + index;
+      nameInput.type = 'text';
+      nameInput.value = item.name;
+
+      const pointsInput = document.createElement('input');
+      pointsInput.className = 'edit-points-input';
+      pointsInput.id = 'editPoints-' + index;
+      pointsInput.type = 'number';
+      pointsInput.value = item.points;
+
+      inputsRow.appendChild(nameInput);
+      inputsRow.appendChild(pointsInput);
+
+      const actionsRow = document.createElement('div');
+      actionsRow.className = 'edit-row-actions';
+
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'save-edit-btn';
+      saveBtn.innerText = 'Save';
+      saveBtn.onclick = () => saveJournalEdit(index);
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'cancel-edit-btn';
+      cancelBtn.innerText = 'Cancel';
+      cancelBtn.onclick = () => cancelJournalEdit();
+
+      actionsRow.appendChild(saveBtn);
+      actionsRow.appendChild(cancelBtn);
+
+      editRow.appendChild(inputsRow);
+      editRow.appendChild(actionsRow);
+      container.appendChild(editRow);
+      return;
+    }
+
     const row = document.createElement('div');
     row.className = 'food-list-item';
 
@@ -467,11 +608,17 @@ function renderJournal() {
     const actions = document.createElement('div');
     actions.className = 'food-actions';
 
+    const editBtn = document.createElement('button');
+    editBtn.className = 'edit-food-btn';
+    editBtn.innerText = 'Edit';
+    editBtn.onclick = () => editJournalEntry(index);
+
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'delete-food-btn';
     deleteBtn.innerText = 'Delete';
     deleteBtn.onclick = () => deleteJournalEntry(index);
 
+    actions.appendChild(editBtn);
     actions.appendChild(deleteBtn);
 
     row.appendChild(info);
@@ -623,6 +770,7 @@ function applyRemoteState(state) {
   }
   if (state.foodJournal !== undefined) {
     setJournal(state.foodJournal);
+    editingJournalIndex = null;
   }
   if (state.savedFoods !== undefined) {
     setSavedFoods(state.savedFoods);
