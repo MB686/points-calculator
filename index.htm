@@ -252,6 +252,55 @@ button:hover {
   padding: 8px;
   font-size: 14px;
 }
+.quick-add-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 80%;
+  margin: 12px auto 6px;
+}
+.quick-add-row input {
+  width: auto;
+  margin: 0;
+}
+#quickAddName {
+  flex: 2;
+  min-width: 0;
+}
+#quickAddPoints {
+  flex: 0 0 70px;
+}
+.heart-btn {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  margin: 0;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.heart-btn svg {
+  width: 22px;
+  height: 22px;
+}
+.heart-btn .heart-shape {
+  fill: none;
+  stroke: #f44336;
+  stroke-width: 2;
+  transition: fill 0.15s;
+}
+.heart-btn.heart-active {
+  border-color: #f44336;
+  background-color: #ffebee;
+}
+.heart-btn.heart-active .heart-shape {
+  fill: #f44336;
+}
 #noJournalItems, #noSavedFoods {
   width: 80%;
   margin: 10px auto;
@@ -330,6 +379,22 @@ button:hover {
 <div id="result"></div>
 
 <button id="addToJournalButton" onclick="addToJournal()">Add to Food Journal</button>
+
+<div class="section-divider"></div>
+<h2>Quick Add</h2>
+<p class="section-hint">Already know the points? Add it directly</p>
+
+<div class="quick-add-row">
+  <input type="text" id="quickAddName" placeholder="Food name">
+  <input type="number" id="quickAddPoints" placeholder="Pts">
+  <button class="heart-btn" id="quickAddHeart" onclick="toggleQuickAddHeart()" title="Save to Saved Foods" type="button">
+    <svg viewBox="0 0 24 24">
+      <path class="heart-shape" d="M12 21s-7.5-4.6-10-9.3C0.4 8.6 1.7 5 5.2 4.1 7.6 3.5 9.8 4.6 12 7.2 14.2 4.6 16.4 3.5 18.8 4.1 22.3 5 23.6 8.6 22 11.7 19.5 16.4 12 21 12 21z"/>
+    </svg>
+  </button>
+</div>
+
+<button id="quickAddButton" onclick="quickAddToJournal()">Add to Food Journal</button>
 
 <div class="section-divider"></div>
 <h2>Today's Food Journal</h2>
@@ -474,6 +539,53 @@ function addToJournal() {
   updateDailyDisplay();
   clearFields();
   saveToCloud();
+}
+
+/* ---------- Quick Add ---------- */
+
+let quickAddHeartActive = false;
+
+function toggleQuickAddHeart() {
+  quickAddHeartActive = !quickAddHeartActive;
+  document.getElementById('quickAddHeart').classList.toggle('heart-active', quickAddHeartActive);
+}
+
+function quickAddToJournal() {
+  const nameInput = document.getElementById('quickAddName');
+  const pointsInput = document.getElementById('quickAddPoints');
+
+  const name = nameInput.value.trim();
+  const points = parseFloat(pointsInput.value);
+
+  if (!name) {
+    alert('Enter a food name.');
+    return;
+  }
+  if (isNaN(points)) {
+    alert('Enter a points value.');
+    return;
+  }
+
+  const journal = getJournal();
+  journal.unshift({ name: name, points: points });
+  setJournal(journal);
+
+  if (quickAddHeartActive) {
+    const foods = getSavedFoods();
+    foods.push({ name: name, points: points });
+    setSavedFoods(foods);
+    renderSavedFoods();
+  }
+
+  renderJournal();
+  updateDailyDisplay();
+  saveToCloud();
+
+  nameInput.value = '';
+  pointsInput.value = '';
+  quickAddHeartActive = false;
+  document.getElementById('quickAddHeart').classList.remove('heart-active');
+  nameInput.focus();
 }
 
 function deleteJournalEntry(index) {
