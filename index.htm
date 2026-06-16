@@ -259,16 +259,21 @@ button:hover {
   width: 80%;
   margin: 12px auto 6px;
 }
-.quick-add-row input {
-  width: auto;
+.quick-add-row input[type="text"],
+.quick-add-row input[type="number"] {
+  display: block;
+  width: 100%;
   margin: 0;
+  padding: 12px;
+  box-sizing: border-box;
 }
-#quickAddName {
-  flex: 2;
+.quick-add-row input#quickAddName {
+  flex: 2 1 0%;
   min-width: 0;
 }
-#quickAddPoints {
-  flex: 0 0 70px;
+.quick-add-row input#quickAddPoints {
+  flex: 0 0 60px;
+  width: 60px;
 }
 .heart-btn {
   flex: 0 0 auto;
