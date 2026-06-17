@@ -252,6 +252,31 @@ button:hover {
   padding: 8px;
   font-size: 14px;
 }
+.calc-result-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 80%;
+  margin: 20px auto 6px;
+}
+.calc-result-row input[type="text"],
+.calc-result-row input[type="number"] {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 12px;
+  box-sizing: border-box;
+}
+.calc-result-row input#foodName {
+  flex: 2 1 0%;
+  min-width: 0;
+}
+.calc-result-row input#calcPoints {
+  flex: 0 0 60px;
+  width: 60px;
+  font-weight: bold;
+  text-align: center;
+}
 .quick-add-row {
   display: flex;
   align-items: center;
@@ -366,9 +391,6 @@ button:hover {
 
 <h1>Weight Watchers Points Calculator</h1>
 
-<label for="foodName">Food Name:</label>
-<input type="text" id="foodName" placeholder="e.g. Apple, Chicken Breast">
-
 <label for="calories">Calories:</label>
 <input type="number" id="calories" placeholder="Enter calories">
 
@@ -381,7 +403,10 @@ button:hover {
 <button onclick="calculatePoints()">Calculate</button>
 <button id="clearButton" onclick="clearFields()">Clear</button>
 
-<div id="result"></div>
+<div class="calc-result-row">
+  <input type="text" id="foodName" placeholder="Food name">
+  <input type="number" id="calcPoints" placeholder="Pts">
+</div>
 
 <button id="addToJournalButton" onclick="addToJournal()">Add to Food Journal</button>
 
@@ -481,7 +506,7 @@ function calculatePoints() {
   const points = Math.round((calories / 50) + (fat / 12) - (cappedFiber / 5));
 
   lastCalculatedPoints = points;
-  document.getElementById('result').innerText = `Points: ${points}`;
+  document.getElementById('calcPoints').value = points;
 }
 
 function clearFields() {
@@ -489,7 +514,7 @@ function clearFields() {
   document.getElementById('calories').value = '';
   document.getElementById('fat').value = '';
   document.getElementById('fiber').value = '';
-  document.getElementById('result').innerText = '';
+  document.getElementById('calcPoints').value = '';
   lastCalculatedPoints = null;
 }
 
@@ -528,8 +553,11 @@ function updateDailyDisplay() {
 }
 
 function addToJournal() {
-  if (lastCalculatedPoints === null) {
-    alert('Calculate points first.');
+  const pointsInput = document.getElementById('calcPoints');
+  const points = parseFloat(pointsInput.value);
+
+  if (isNaN(points)) {
+    alert('Calculate points first (or enter a points value).');
     return;
   }
 
@@ -537,7 +565,7 @@ function addToJournal() {
   const name = nameInput.value.trim() || 'Food';
 
   const journal = getJournal();
-  journal.unshift({ name: name, points: lastCalculatedPoints });
+  journal.unshift({ name: name, points: points });
   setJournal(journal);
 
   renderJournal();
@@ -763,18 +791,19 @@ function setSavedFoods(foods) {
 
 function saveFood() {
   const name = document.getElementById('foodName').value.trim();
+  const points = parseFloat(document.getElementById('calcPoints').value);
 
   if (!name) {
     alert('Enter a name for this food.');
     return;
   }
-  if (lastCalculatedPoints === null) {
-    alert('Calculate points first.');
+  if (isNaN(points)) {
+    alert('Calculate points first (or enter a points value).');
     return;
   }
 
   const foods = getSavedFoods();
-  foods.push({ name: name, points: lastCalculatedPoints });
+  foods.push({ name: name, points: points });
   setSavedFoods(foods);
 
   renderSavedFoods();
