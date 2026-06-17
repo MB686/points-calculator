@@ -289,6 +289,20 @@ button:hover {
 .calc-result-row input#calcPoints:focus {
   box-shadow: 0 0 16px rgba(76, 175, 80, 0.7);
 }
+.calc-result-row input#calcPoints.pulse-glow {
+  animation: pointsPulse 0.8s ease-out;
+}
+@keyframes pointsPulse {
+  0% {
+    box-shadow: 0 0 12px rgba(76, 175, 80, 0.5);
+  }
+  30% {
+    box-shadow: 0 0 28px rgba(76, 175, 80, 1);
+  }
+  100% {
+    box-shadow: 0 0 12px rgba(76, 175, 80, 0.5);
+  }
+}
 .heart-btn {
   flex: 0 0 auto;
   width: 44px;
@@ -488,7 +502,13 @@ function calculatePoints() {
   const points = Math.round((calories / 50) + (fat / 12) - (cappedFiber / 5));
 
   lastCalculatedPoints = points;
-  document.getElementById('calcPoints').value = points;
+  const pointsInput = document.getElementById('calcPoints');
+  pointsInput.value = points;
+
+  pointsInput.classList.remove('pulse-glow');
+  // Force a reflow so the animation restarts even if triggered repeatedly
+  void pointsInput.offsetWidth;
+  pointsInput.classList.add('pulse-glow');
 }
 
 function clearFields() {
