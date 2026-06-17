@@ -9,33 +9,33 @@
 <style>
 body {
   font-family: Arial, Helvetica, sans-serif;
-  max-width: 400px;
+  max-width: 480px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 16px 8px;
   background-color: #f8f9fa;
 }
 h1 {
-  width: 80%;
+  width: 92%;
   margin: 0 auto 25px;
   text-align: center;
   color: #333;
 }
 h2 {
-  width: 80%;
+  width: 92%;
   margin: 0 auto 15px;
   text-align: center;
   color: #333;
   font-size: 18px;
 }
 .section-hint {
-  width: 80%;
+  width: 92%;
   margin: -10px auto 15px;
   text-align: center;
   color: #999;
   font-size: 14px;
 }
 .calc-hint {
-  width: 80%;
+  width: 92%;
   margin: 16px auto 4px;
   text-align: center;
   color: #999;
@@ -43,7 +43,7 @@ h2 {
 }
 .section-divider {
   border-top: 2px solid #e0e0e0;
-  width: 80%;
+  width: 92%;
   margin: 30px auto 20px;
 }
 label {
@@ -51,11 +51,11 @@ label {
   margin: 12px auto 6px;
   font-size: 17px;
   font-weight: 600;
-  width: 80%;
+  width: 92%;
   color: #444;
 }
 input {
-  width: 80%;
+  width: 92%;
   padding: 12px;
   box-sizing: border-box;
   margin: 0 auto;
@@ -75,7 +75,7 @@ input::placeholder {
   color: #aaa;
 }
 button {
-  width: 80%;
+  width: 92%;
   padding: 14px;
   background-color: #4CAF50;
   color: white;
@@ -115,7 +115,7 @@ button:hover {
   margin: 25px auto 0;
   font-size: 22px;
   font-weight: bold;
-  width: 80%;
+  width: 92%;
   text-align: center;
   color: #2c3e50;
   min-height: 30px;
@@ -125,7 +125,7 @@ button:hover {
   border: 2px solid #ccc;
   border-radius: 8px;
   padding: 15px;
-  width: 80%;
+  width: 92%;
   margin: 0 auto 12px;
   box-sizing: border-box;
 }
@@ -156,7 +156,7 @@ button:hover {
   border: 2px solid #ccc;
   border-radius: 8px;
   padding: 10px 12px;
-  width: 80%;
+  width: 92%;
   margin: 8px auto;
   box-sizing: border-box;
 }
@@ -224,7 +224,7 @@ button:hover {
   border: 2px solid #2196F3;
   border-radius: 8px;
   padding: 12px;
-  width: 80%;
+  width: 92%;
   margin: 8px auto;
   box-sizing: border-box;
 }
@@ -263,7 +263,7 @@ button:hover {
   display: flex;
   align-items: center;
   gap: 8px;
-  width: 80%;
+  width: 92%;
   margin: 20px auto 6px;
 }
 .calc-result-row input[type="text"],
@@ -316,7 +316,7 @@ button:hover {
   fill: #f44336;
 }
 #noJournalItems, #noSavedFoods {
-  width: 80%;
+  width: 92%;
   margin: 10px auto;
   text-align: center;
   color: #999;
@@ -327,7 +327,7 @@ button:hover {
   border: 2px solid #ccc;
   border-radius: 8px;
   padding: 15px;
-  width: 80%;
+  width: 92%;
   margin: 0 auto 12px;
   box-sizing: border-box;
   text-align: center;
@@ -387,7 +387,7 @@ button:hover {
 <button onclick="calculatePoints()">Calculate</button>
 <button id="clearButton" onclick="clearFields()">Clear</button>
 
-<p class="calc-hint">Name this food, then add it to your journal. You can also type a points value directly without calculating, if you already know it.</p>
+<p class="calc-hint">Name this food, then add it to your journal. You can also type a points value directly without calculating, if you already know it. Click the heart icon to add the food to your favorites list.</p>
 
 <div class="calc-result-row">
   <input type="text" id="foodName" placeholder="Food name">
