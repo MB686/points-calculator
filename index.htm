@@ -373,7 +373,7 @@ button:hover {
 </head>
 <body>
 
-<h1>Weight Watchers Points Calculator</h1>
+<h1>Food Points Calculator and Journal</h1>
 
 <label for="calories">Calories:</label>
 <input type="number" id="calories" placeholder="Enter calories">
@@ -385,9 +385,10 @@ button:hover {
 <input type="number" id="fiber" placeholder="Enter fiber grams">
 
 <button onclick="calculatePoints()">Calculate</button>
-<button id="clearButton" onclick="clearFields()">Clear</button>
 
-<p class="calc-hint">Name this food, then add it to your journal. You can also type a points value directly without calculating, if you already know it. Click the heart icon to add the food to your favorites list.</p>
+<p class="calc-hint">Name the calculated food, then add it to your food journal. You can also type a points value directly without calculating, if you already know it. Click the heart icon to add the food and its value to your favorites list for easy future access.</p>
+
+<button id="clearButton" onclick="clearFields()">Clear</button>
 
 <div class="calc-result-row">
   <input type="text" id="foodName" placeholder="Food name">
