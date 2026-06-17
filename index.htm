@@ -34,6 +34,13 @@ h2 {
   color: #999;
   font-size: 14px;
 }
+.calc-hint {
+  width: 80%;
+  margin: 16px auto 4px;
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+}
 .section-divider {
   border-top: 2px solid #e0e0e0;
   width: 80%;
@@ -277,29 +284,6 @@ button:hover {
   font-weight: bold;
   text-align: center;
 }
-.quick-add-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 80%;
-  margin: 12px auto 6px;
-}
-.quick-add-row input[type="text"],
-.quick-add-row input[type="number"] {
-  display: block;
-  width: 100%;
-  margin: 0;
-  padding: 12px;
-  box-sizing: border-box;
-}
-.quick-add-row input#quickAddName {
-  flex: 2 1 0%;
-  min-width: 0;
-}
-.quick-add-row input#quickAddPoints {
-  flex: 0 0 60px;
-  width: 60px;
-}
 .heart-btn {
   flex: 0 0 auto;
   width: 44px;
@@ -403,28 +387,19 @@ button:hover {
 <button onclick="calculatePoints()">Calculate</button>
 <button id="clearButton" onclick="clearFields()">Clear</button>
 
+<p class="calc-hint">Name this food, then add it to your journal. You can also type a points value directly without calculating, if you already know it.</p>
+
 <div class="calc-result-row">
   <input type="text" id="foodName" placeholder="Food name">
   <input type="number" id="calcPoints" placeholder="Pts">
-</div>
-
-<button id="addToJournalButton" onclick="addToJournal()">Add to Food Journal</button>
-
-<div class="section-divider"></div>
-<h2>Quick Add</h2>
-<p class="section-hint">Already know the points? Add it directly</p>
-
-<div class="quick-add-row">
-  <input type="text" id="quickAddName" placeholder="Food name">
-  <input type="number" id="quickAddPoints" placeholder="Pts">
-  <button class="heart-btn" id="quickAddHeart" onclick="toggleQuickAddHeart()" title="Save to Saved Foods" type="button">
+  <button class="heart-btn" id="favoriteHeart" onclick="toggleFavoriteHeart()" title="Save to Saved Foods" type="button">
     <svg viewBox="0 0 24 24">
       <path class="heart-shape" d="M12 21s-7.5-4.6-10-9.3C0.4 8.6 1.7 5 5.2 4.1 7.6 3.5 9.8 4.6 12 7.2 14.2 4.6 16.4 3.5 18.8 4.1 22.3 5 23.6 8.6 22 11.7 19.5 16.4 12 21 12 21z"/>
     </svg>
   </button>
 </div>
 
-<button id="quickAddButton" onclick="quickAddToJournal()">Add to Food Journal</button>
+<button id="addToJournalButton" onclick="addToJournal()">Add to Food Journal</button>
 
 <div class="section-divider"></div>
 <h2>Today's Food Journal</h2>
@@ -490,6 +465,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 let lastCalculatedPoints = null;
+let favoriteHeartActive = false;
 let syncCode = null;
 let unsubscribeSync = null;
 let isApplyingRemote = false;
@@ -516,6 +492,8 @@ function clearFields() {
   document.getElementById('fiber').value = '';
   document.getElementById('calcPoints').value = '';
   lastCalculatedPoints = null;
+  favoriteHeartActive = false;
+  document.getElementById('favoriteHeart').classList.remove('heart-active');
 }
 
 /* ---------- Food Journal ---------- */
@@ -568,42 +546,7 @@ function addToJournal() {
   journal.unshift({ name: name, points: points });
   setJournal(journal);
 
-  renderJournal();
-  updateDailyDisplay();
-  clearFields();
-  saveToCloud();
-}
-
-/* ---------- Quick Add ---------- */
-
-let quickAddHeartActive = false;
-
-function toggleQuickAddHeart() {
-  quickAddHeartActive = !quickAddHeartActive;
-  document.getElementById('quickAddHeart').classList.toggle('heart-active', quickAddHeartActive);
-}
-
-function quickAddToJournal() {
-  const nameInput = document.getElementById('quickAddName');
-  const pointsInput = document.getElementById('quickAddPoints');
-
-  const name = nameInput.value.trim();
-  const points = parseFloat(pointsInput.value);
-
-  if (!name) {
-    alert('Enter a food name.');
-    return;
-  }
-  if (isNaN(points)) {
-    alert('Enter a points value.');
-    return;
-  }
-
-  const journal = getJournal();
-  journal.unshift({ name: name, points: points });
-  setJournal(journal);
-
-  if (quickAddHeartActive) {
+  if (favoriteHeartActive) {
     const foods = getSavedFoods();
     foods.push({ name: name, points: points });
     setSavedFoods(foods);
@@ -612,13 +555,15 @@ function quickAddToJournal() {
 
   renderJournal();
   updateDailyDisplay();
+  clearFields();
   saveToCloud();
+}
 
-  nameInput.value = '';
-  pointsInput.value = '';
-  quickAddHeartActive = false;
-  document.getElementById('quickAddHeart').classList.remove('heart-active');
-  nameInput.focus();
+/* ---------- Favorite Heart ---------- */
+
+function toggleFavoriteHeart() {
+  favoriteHeartActive = !favoriteHeartActive;
+  document.getElementById('favoriteHeart').classList.toggle('heart-active', favoriteHeartActive);
 }
 
 function deleteJournalEntry(index) {
