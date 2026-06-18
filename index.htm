@@ -384,11 +384,54 @@ button:hover {
 #connectSyncButton:hover {
   background-color: #1976D2;
 }
+.tab-bar {
+  display: flex;
+  width: 92%;
+  margin: 0 auto 25px;
+  border-bottom: 2px solid #e0e0e0;
+}
+.tab-btn {
+  flex: 1;
+  width: auto;
+  margin: 0;
+  padding: 12px 4px;
+  background-color: transparent;
+  color: #888;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  cursor: pointer;
+}
+.tab-btn:hover {
+  background-color: transparent;
+  color: #4CAF50;
+}
+.tab-btn.active {
+  color: #4CAF50;
+  border-bottom: 3px solid #4CAF50;
+}
+.tab-panel {
+  display: none;
+}
+.tab-panel.active {
+  display: block;
+}
 </style>
 </head>
 <body>
 
 <h1>Food Points Calculator and Journal</h1>
+
+<div class="tab-bar">
+  <button class="tab-btn active" id="tabBtn-calculator" onclick="switchTab('calculator')">Calculator</button>
+  <button class="tab-btn" id="tabBtn-journal" onclick="switchTab('journal')">Journal</button>
+  <button class="tab-btn" id="tabBtn-favorites" onclick="switchTab('favorites')">Favorites</button>
+  <button class="tab-btn" id="tabBtn-settings" onclick="switchTab('settings')">Settings</button>
+</div>
+
+<div class="tab-panel active" id="tabPanel-calculator">
 
 <label for="calories">Calories:</label>
 <input type="number" id="calories" placeholder="Enter calories">
@@ -417,7 +460,10 @@ button:hover {
 
 <button id="clearButton" onclick="clearFields()">Clear</button>
 
-<div class="section-divider"></div>
+</div>
+
+<div class="tab-panel" id="tabPanel-journal">
+
 <h2>Today's Food Journal</h2>
 
 <label for="allowance">Daily Allowance:</label>
@@ -433,7 +479,10 @@ button:hover {
 
 <button id="resetDayButton" onclick="resetDay()">Reset Day</button>
 
-<div class="section-divider"></div>
+</div>
+
+<div class="tab-panel" id="tabPanel-favorites">
+
 <h2>Saved Foods</h2>
 <p class="section-hint">Quickly add foods you eat often</p>
 
@@ -442,7 +491,10 @@ button:hover {
 <div id="savedFoodsList"></div>
 <div id="noSavedFoods">No saved foods yet</div>
 
-<div class="section-divider"></div>
+</div>
+
+<div class="tab-panel" id="tabPanel-settings">
+
 <h2>Sync Across Devices</h2>
 
 <div class="sync-box">
@@ -456,6 +508,8 @@ button:hover {
 <input type="text" id="syncCodeInput" placeholder="e.g. AB12CD34">
 <button id="connectSyncButton" onclick="connectSyncCode()">Connect</button>
 
+</div>
+
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -465,6 +519,16 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/points-calculator/sw.js')
     .then(() => console.log('Service Worker Registered in index.html'))
     .catch(error => console.log('Service Worker Registration Failed in index.html:', error));
+}
+
+/* ---------- Tab Navigation ---------- */
+
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+  document.getElementById('tabPanel-' + tabName).classList.add('active');
+  document.getElementById('tabBtn-' + tabName).classList.add('active');
 }
 
 /* ---------- Firebase setup ---------- */
