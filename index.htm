@@ -75,7 +75,10 @@ input::placeholder {
   color: #aaa;
 }
 .narrow-input {
-  width: 110px !important;
+  width: 90px !important;
+}
+.centered-label {
+  text-align: center;
 }
 button {
   width: 92%;
@@ -129,7 +132,7 @@ button:hover {
   border-radius: 8px;
   padding: 15px;
   width: 92%;
-  margin: 0 auto 12px;
+  margin: 10px auto 12px;
   box-sizing: border-box;
 }
 .tracker-row {
@@ -488,7 +491,7 @@ button:hover {
 
 <h2>Today's Food Journal</h2>
 
-<label for="allowance">Daily Allowance:</label>
+<label for="allowance" class="centered-label">Daily Allowance:</label>
 <input type="number" id="allowance" class="narrow-input" placeholder="Enter daily points allowance">
 
 <div class="tracker-box">
