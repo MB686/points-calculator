@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Weight Watchers Points Calculator</title>
+<title>Food Calculator and Journal</title>
 <link rel="apple-touch-icon" href="icon.png">
 <style>
 body {
@@ -425,13 +425,13 @@ button:hover {
 <h1>Food Points Calculator and Journal</h1>
 
 <div class="tab-bar">
-  <button class="tab-btn active" id="tabBtn-calculator" onclick="switchTab('calculator')">Calculator</button>
-  <button class="tab-btn" id="tabBtn-journal" onclick="switchTab('journal')">Journal</button>
+  <button class="tab-btn active" id="tabBtn-journal" onclick="switchTab('journal')">Journal</button>
+  <button class="tab-btn" id="tabBtn-calculator" onclick="switchTab('calculator')">Calculator</button>
   <button class="tab-btn" id="tabBtn-favorites" onclick="switchTab('favorites')">Favorites</button>
   <button class="tab-btn" id="tabBtn-settings" onclick="switchTab('settings')">Settings</button>
 </div>
 
-<div class="tab-panel active" id="tabPanel-calculator">
+<div class="tab-panel" id="tabPanel-calculator">
 
 <label for="calories">Calories:</label>
 <input type="number" id="calories" placeholder="Enter calories">
@@ -462,7 +462,7 @@ button:hover {
 
 </div>
 
-<div class="tab-panel" id="tabPanel-journal">
+<div class="tab-panel active" id="tabPanel-journal">
 
 <h2>Today's Food Journal</h2>
 
