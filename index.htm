@@ -74,6 +74,9 @@ input:focus {
 input::placeholder {
   color: #aaa;
 }
+.narrow-input {
+  width: 110px !important;
+}
 button {
   width: 92%;
   padding: 14px;
@@ -147,6 +150,25 @@ button:hover {
 }
 .remaining-over {
   color: #f44336;
+}
+.journal-box {
+  background-color: white;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  padding: 4px 12px;
+  width: 92%;
+  margin: 0 auto 12px;
+  box-sizing: border-box;
+}
+.journal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+.journal-row:last-child {
+  border-bottom: none;
 }
 .food-list-item {
   display: flex;
@@ -467,15 +489,17 @@ button:hover {
 <h2>Today's Food Journal</h2>
 
 <label for="allowance">Daily Allowance:</label>
-<input type="number" id="allowance" placeholder="Enter daily points allowance">
+<input type="number" id="allowance" class="narrow-input" placeholder="Enter daily points allowance">
 
 <div class="tracker-box">
   <div class="tracker-row"><span>Used Today:</span><span id="usedToday">0</span></div>
   <div class="tracker-row"><span>Remaining:</span><span id="remainingToday">0</span></div>
 </div>
 
-<div id="journalList"></div>
-<div id="noJournalItems">No foods logged yet today</div>
+<div class="journal-box">
+  <div id="journalList"></div>
+  <div id="noJournalItems">No foods logged yet today</div>
+</div>
 
 <button id="resetDayButton" onclick="resetDay()">Reset Day</button>
 
@@ -711,14 +735,19 @@ function renderJournal() {
   const journal = getJournal();
   const container = document.getElementById('journalList');
   const emptyMessage = document.getElementById('noJournalItems');
+  const journalBox = container.closest('.journal-box');
 
   container.innerHTML = '';
 
   if (journal.length === 0) {
     emptyMessage.style.display = 'block';
+    journalBox.style.border = 'none';
+    journalBox.style.padding = '0';
     return;
   }
   emptyMessage.style.display = 'none';
+  journalBox.style.border = '2px solid #ccc';
+  journalBox.style.padding = '4px 12px';
 
   journal.forEach((item, index) => {
     if (editingJournalIndex === index) {
@@ -766,7 +795,7 @@ function renderJournal() {
     }
 
     const row = document.createElement('div');
-    row.className = 'food-list-item';
+    row.className = 'journal-row';
 
     const info = document.createElement('div');
     info.className = 'food-info';
