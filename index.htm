@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Food Calculator and Journal</title>
+<title>Tracket</title>
 <link rel="apple-touch-icon" href="icon.png">
 <style>
 body {
@@ -16,9 +16,22 @@ body {
 }
 h1 {
   width: 92%;
-  margin: 0 auto 25px;
+  margin: 0 auto 4px;
   text-align: center;
   color: #333;
+  font-size: 36px;
+  font-weight: 500;
+  letter-spacing: -1px;
+}
+.tagline {
+  width: 92%;
+  margin: 0 auto 25px;
+  text-align: center;
+  font-size: 13px;
+  color: #888;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 h2 {
   width: 92%;
@@ -447,7 +460,8 @@ button:hover {
 </head>
 <body>
 
-<h1>Food Points Calculator and Journal</h1>
+<h1><span style="color:#4CAF50;">T</span>racket</h1>
+<p class="tagline">track it. own it.</p>
 
 <div class="tab-bar">
   <button class="tab-btn active" id="tabBtn-journal" onclick="switchTab('journal')">Journal</button>
