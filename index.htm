@@ -167,7 +167,73 @@ button:hover {
 .remaining-over {
   color: #f44336;
 }
-.journal-box {
+.meal-selector {
+  display: flex;
+  gap: 6px;
+  width: 92%;
+  margin: 12px auto 6px;
+}
+.meal-btn {
+  flex: 1;
+  width: auto;
+  margin: 0;
+  padding: 10px 4px;
+  background-color: white;
+  color: #666;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.meal-btn:hover {
+  border-color: #4CAF50;
+  color: #4CAF50;
+  background-color: white;
+}
+.meal-btn.meal-active {
+  background-color: #4CAF50;
+  border-color: #4CAF50;
+  color: white;
+}
+.meal-label {
+  display: block;
+  margin: 12px auto 6px;
+  font-size: 17px;
+  font-weight: 600;
+  width: 92%;
+  color: #444;
+}
+.journal-meal-group {
+  width: 92%;
+  margin: 0 auto 12px;
+}
+.journal-meal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background-color: #f0f0f0;
+  border-radius: 8px 8px 0 0;
+  border: 2px solid #ccc;
+  border-bottom: none;
+}
+.journal-meal-header span:first-child {
+  font-weight: 600;
+  font-size: 14px;
+  color: #444;
+}
+.journal-meal-header span:last-child {
+  font-size: 13px;
+  color: #888;
+}
+.journal-meal-body {
+  background-color: white;
+  border: 2px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 4px 12px;
+}
   background-color: white;
   border: 2px solid #ccc;
   border-radius: 8px;
@@ -493,6 +559,14 @@ button:hover {
   </button>
 </div>
 
+<span class="meal-label">Meal:</span>
+<div class="meal-selector">
+  <button class="meal-btn" id="mealBtn-Breakfast" onclick="selectMeal('Breakfast')" type="button">Breakfast</button>
+  <button class="meal-btn" id="mealBtn-Lunch" onclick="selectMeal('Lunch')" type="button">Lunch</button>
+  <button class="meal-btn" id="mealBtn-Dinner" onclick="selectMeal('Dinner')" type="button">Dinner</button>
+  <button class="meal-btn" id="mealBtn-Snack" onclick="selectMeal('Snack')" type="button">Snack</button>
+</div>
+
 <p class="calc-hint">Name the calculated food, then add it to your food journal. You can also type a points value directly without calculating, if you already know it. Click the heart icon to add the food and its value to your favorites list for easy future access.</p>
 
 <button id="addToJournalButton" onclick="addToJournal()">Add to Food Journal</button>
@@ -587,6 +661,7 @@ const db = firebase.firestore();
 
 let lastCalculatedPoints = null;
 let favoriteHeartActive = false;
+let selectedMeal = null;
 let syncCode = null;
 let unsubscribeSync = null;
 let isApplyingRemote = false;
@@ -612,6 +687,12 @@ function calculatePoints() {
   pointsInput.classList.add('pulse-glow');
 }
 
+function selectMeal(meal) {
+  selectedMeal = meal;
+  document.querySelectorAll('.meal-btn').forEach(btn => btn.classList.remove('meal-active'));
+  document.getElementById('mealBtn-' + meal).classList.add('meal-active');
+}
+
 function clearFields() {
   document.getElementById('foodName').value = '';
   document.getElementById('calories').value = '';
@@ -621,6 +702,8 @@ function clearFields() {
   lastCalculatedPoints = null;
   favoriteHeartActive = false;
   document.getElementById('favoriteHeart').classList.remove('heart-active');
+  selectedMeal = null;
+  document.querySelectorAll('.meal-btn').forEach(btn => btn.classList.remove('meal-active'));
 }
 
 /* ---------- Food Journal ---------- */
@@ -665,12 +748,16 @@ function addToJournal() {
     alert('Calculate points first (or enter a points value).');
     return;
   }
+  if (!selectedMeal) {
+    alert('Please select a meal category (Breakfast, Lunch, Dinner, or Snack).');
+    return;
+  }
 
   const nameInput = document.getElementById('foodName');
   const name = nameInput.value.trim() || 'Food';
 
   const journal = getJournal();
-  journal.unshift({ name: name, points: points });
+  journal.unshift({ name: name, points: points, meal: selectedMeal });
   setJournal(journal);
 
   if (favoriteHeartActive) {
@@ -729,7 +816,7 @@ function saveJournalEdit(index) {
   }
 
   const journal = getJournal();
-  journal[index] = { name: name, points: points };
+  journal[index] = { name: name, points: points, meal: journal[index].meal || 'Uncategorized' };
   setJournal(journal);
 
   editingJournalIndex = null;
@@ -763,90 +850,114 @@ function renderJournal() {
     return;
   }
   emptyMessage.style.display = 'none';
-  journalBox.style.border = '2px solid #ccc';
-  journalBox.style.padding = '4px 12px';
+  journalBox.style.border = 'none';
+  journalBox.style.padding = '0';
 
-  journal.forEach((item, index) => {
-    if (editingJournalIndex === index) {
-      const editRow = document.createElement('div');
-      editRow.className = 'edit-row';
+  const mealOrder = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
 
-      const inputsRow = document.createElement('div');
-      inputsRow.className = 'edit-row-inputs';
+  mealOrder.forEach(meal => {
+    const entries = journal
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => (item.meal || 'Uncategorized') === meal);
 
-      const nameInput = document.createElement('input');
-      nameInput.className = 'edit-name-input';
-      nameInput.id = 'editName-' + index;
-      nameInput.type = 'text';
-      nameInput.value = item.name;
+    if (entries.length === 0) return;
 
-      const pointsInput = document.createElement('input');
-      pointsInput.className = 'edit-points-input';
-      pointsInput.id = 'editPoints-' + index;
-      pointsInput.type = 'number';
-      pointsInput.value = item.points;
+    const subtotal = entries.reduce((sum, { item }) => sum + item.points, 0);
 
-      inputsRow.appendChild(nameInput);
-      inputsRow.appendChild(pointsInput);
+    const group = document.createElement('div');
+    group.className = 'journal-meal-group';
 
-      const actionsRow = document.createElement('div');
-      actionsRow.className = 'edit-row-actions';
+    const header = document.createElement('div');
+    header.className = 'journal-meal-header';
+    header.innerHTML = `<span>${meal}</span><span>${subtotal} pts</span>`;
 
-      const saveBtn = document.createElement('button');
-      saveBtn.className = 'save-edit-btn';
-      saveBtn.innerText = 'Save';
-      saveBtn.onclick = () => saveJournalEdit(index);
+    const body = document.createElement('div');
+    body.className = 'journal-meal-body';
 
-      const cancelBtn = document.createElement('button');
-      cancelBtn.className = 'cancel-edit-btn';
-      cancelBtn.innerText = 'Cancel';
-      cancelBtn.onclick = () => cancelJournalEdit();
+    entries.forEach(({ item, index }) => {
+      if (editingJournalIndex === index) {
+        const editRow = document.createElement('div');
+        editRow.className = 'edit-row';
 
-      actionsRow.appendChild(saveBtn);
-      actionsRow.appendChild(cancelBtn);
+        const inputsRow = document.createElement('div');
+        inputsRow.className = 'edit-row-inputs';
 
-      editRow.appendChild(inputsRow);
-      editRow.appendChild(actionsRow);
-      container.appendChild(editRow);
-      return;
-    }
+        const nameInput = document.createElement('input');
+        nameInput.className = 'edit-name-input';
+        nameInput.id = 'editName-' + index;
+        nameInput.type = 'text';
+        nameInput.value = item.name;
 
-    const row = document.createElement('div');
-    row.className = 'journal-row';
+        const pointsInput = document.createElement('input');
+        pointsInput.className = 'edit-points-input';
+        pointsInput.id = 'editPoints-' + index;
+        pointsInput.type = 'number';
+        pointsInput.value = item.points;
 
-    const info = document.createElement('div');
-    info.className = 'food-info';
+        inputsRow.appendChild(nameInput);
+        inputsRow.appendChild(pointsInput);
 
-    const nameEl = document.createElement('span');
-    nameEl.className = 'food-name';
-    nameEl.innerText = item.name;
+        const actionsRow = document.createElement('div');
+        actionsRow.className = 'edit-row-actions';
 
-    const pointsEl = document.createElement('span');
-    pointsEl.className = 'food-points';
-    pointsEl.innerText = `${item.points} pts`;
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'save-edit-btn';
+        saveBtn.innerText = 'Save';
+        saveBtn.onclick = () => saveJournalEdit(index);
 
-    info.appendChild(nameEl);
-    info.appendChild(pointsEl);
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'cancel-edit-btn';
+        cancelBtn.innerText = 'Cancel';
+        cancelBtn.onclick = () => cancelJournalEdit();
 
-    const actions = document.createElement('div');
-    actions.className = 'food-actions';
+        actionsRow.appendChild(saveBtn);
+        actionsRow.appendChild(cancelBtn);
+        editRow.appendChild(inputsRow);
+        editRow.appendChild(actionsRow);
+        body.appendChild(editRow);
+        return;
+      }
 
-    const editBtn = document.createElement('button');
-    editBtn.className = 'edit-food-btn';
-    editBtn.innerText = 'Edit';
-    editBtn.onclick = () => editJournalEntry(index);
+      const row = document.createElement('div');
+      row.className = 'journal-row';
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'delete-food-btn';
-    deleteBtn.innerText = 'Delete';
-    deleteBtn.onclick = () => deleteJournalEntry(index);
+      const info = document.createElement('div');
+      info.className = 'food-info';
 
-    actions.appendChild(editBtn);
-    actions.appendChild(deleteBtn);
+      const nameEl = document.createElement('span');
+      nameEl.className = 'food-name';
+      nameEl.innerText = item.name;
 
-    row.appendChild(info);
-    row.appendChild(actions);
-    container.appendChild(row);
+      const pointsEl = document.createElement('span');
+      pointsEl.className = 'food-points';
+      pointsEl.innerText = `${item.points} pts`;
+
+      info.appendChild(nameEl);
+      info.appendChild(pointsEl);
+
+      const actions = document.createElement('div');
+      actions.className = 'food-actions';
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'edit-food-btn';
+      editBtn.innerText = 'Edit';
+      editBtn.onclick = () => editJournalEntry(index);
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-food-btn';
+      deleteBtn.innerText = 'Delete';
+      deleteBtn.onclick = () => deleteJournalEntry(index);
+
+      actions.appendChild(editBtn);
+      actions.appendChild(deleteBtn);
+      row.appendChild(info);
+      row.appendChild(actions);
+      body.appendChild(row);
+    });
+
+    group.appendChild(header);
+    group.appendChild(body);
+    container.appendChild(group);
   });
 }
 
