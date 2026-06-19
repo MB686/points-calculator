@@ -451,6 +451,26 @@ button:hover {
   color: #999;
   font-size: 15px;
 }
+.toast-message {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%) translateY(20px);
+  background-color: #2c3e50;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 1000;
+}
+.toast-message.toast-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
 .sync-box {
   background-color: white;
   border: 2px solid #ccc;
@@ -538,6 +558,8 @@ button:hover {
 
 <h1><span style="color:#4CAF50;">T</span>racket</h1>
 <p class="tagline">track it. own it.</p>
+
+<div class="toast-message" id="toastMessage" aria-live="polite"></div>
 
 <div class="tab-bar">
   <button class="tab-btn active" id="tabBtn-journal" onclick="switchTab('journal')">Journal</button>
@@ -722,6 +744,17 @@ function resetFavoriteHeart() {
   document.getElementById('favoriteHeart').classList.remove('heart-active');
 }
 
+function showToast(message) {
+  const toast = document.getElementById('toastMessage');
+  toast.innerText = message;
+  toast.classList.add('toast-visible');
+
+  clearTimeout(toast.hideTimeout);
+  toast.hideTimeout = setTimeout(() => {
+    toast.classList.remove('toast-visible');
+  }, 1600);
+}
+
 /* ---------- Food Journal ---------- */
 
 function checkNewDay() {
@@ -807,8 +840,8 @@ function toggleFavoriteHeart() {
     saveToCloud();
   }
 
-  favoriteHeartActive = true;
-  document.getElementById('favoriteHeart').classList.add('heart-active');
+  resetFavoriteHeart();
+  showToast('Added to Favorites');
 }
 
 function deleteJournalEntry(index) {
