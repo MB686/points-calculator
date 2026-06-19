@@ -256,6 +256,44 @@ button:hover {
 .journal-row:last-child {
   border-bottom: none;
 }
+  .journal-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  gap: 8px;
+}
+.journal-row:last-child {
+  border-bottom: none;
+}
+
+/* === PASTING IT HERE (Line 184) IS PERFECT === */
+#savedFoodsList .food-list-item {
+  padding: 6px 10px;
+  margin: 6px auto;
+}
+#savedFoodsList .food-name {
+  font-size: 15px;
+}
+#savedFoodsList .food-points {
+  font-size: 13px;
+}
+#savedFoodsList .food-actions button {
+  padding: 6px 10px;
+  font-size: 13px;
+  width: auto;
+  margin: 0;
+}
+/* ============================================= */
+
+.food-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+/* ... continues below ... */
 .food-list-item {
   display: flex;
   align-items: center;
