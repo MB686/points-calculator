@@ -234,6 +234,7 @@ button:hover {
   border-radius: 0 0 8px 8px;
   padding: 4px 12px;
 }
+.journal-box {
   background-color: white;
   border: 2px solid #ccc;
   border-radius: 8px;
@@ -244,11 +245,13 @@ button:hover {
 }
 .journal-row {
   display: flex;
+  flex-direction: row;
   flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
   padding: 10px 0;
   border-bottom: 1px solid #eee;
+  gap: 8px;
 }
 .journal-row:last-child {
   border-bottom: none;
@@ -930,10 +933,16 @@ function renderJournal() {
 
       const info = document.createElement('div');
       info.className = 'food-info';
+      info.style.minWidth = '0';
+      info.style.flex = '1';
 
       const nameEl = document.createElement('span');
       nameEl.className = 'food-name';
       nameEl.innerText = item.name;
+      nameEl.style.display = 'block';
+      nameEl.style.overflow = 'hidden';
+      nameEl.style.textOverflow = 'ellipsis';
+      nameEl.style.whiteSpace = 'nowrap';
 
       const pointsEl = document.createElement('span');
       pointsEl.className = 'food-points';
@@ -944,6 +953,9 @@ function renderJournal() {
 
       const actions = document.createElement('div');
       actions.className = 'food-actions';
+      actions.style.display = 'flex';
+      actions.style.flexShrink = '0';
+      actions.style.gap = '6px';
 
       const editBtn = document.createElement('span');
       editBtn.className = 'edit-food-btn action-btn';
@@ -1011,7 +1023,7 @@ function addSavedFood(index) {
   if (!food) return;
 
   const journal = getJournal();
-  journal.unshift({ name: food.name, points: food.points });
+  journal.unshift({ name: food.name, points: food.points, meal: 'Snack' });
   setJournal(journal);
 
   renderJournal();
