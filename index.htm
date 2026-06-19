@@ -577,7 +577,7 @@ button:hover {
   <button class="meal-btn" id="mealBtn-Snack" onclick="selectMeal('Snack')" type="button">Snack</button>
 </div>
 
-<p class="calc-hint">Name the calculated food, then add it to your food journal. You can also type a points value directly without calculating, if you already know it. Click the heart icon to add the food and its value to your favorites list for easy future access.</p>
+<p class="calc-hint">Name the calculated food, then add it to your food journal. You can also type a points value directly without calculating, if you already know it. Click the heart icon to save the food and its value to your favorites list without adding it to today's journal.</p>
 
 <button id="addToJournalButton" onclick="addToJournal()">Add to Food Journal</button>
 
@@ -690,6 +690,7 @@ function calculatePoints() {
   lastCalculatedPoints = points;
   const pointsInput = document.getElementById('calcPoints');
   pointsInput.value = points;
+  resetFavoriteHeart();
 
   pointsInput.classList.remove('pulse-glow');
   // Force a reflow so the animation restarts even if triggered repeatedly
@@ -714,6 +715,11 @@ function clearFields() {
   document.getElementById('favoriteHeart').classList.remove('heart-active');
   selectedMeal = null;
   document.querySelectorAll('.meal-btn').forEach(btn => btn.classList.remove('meal-active'));
+}
+
+function resetFavoriteHeart() {
+  favoriteHeartActive = false;
+  document.getElementById('favoriteHeart').classList.remove('heart-active');
 }
 
 /* ---------- Food Journal ---------- */
@@ -770,13 +776,6 @@ function addToJournal() {
   journal.unshift({ name: name, points: points, meal: selectedMeal });
   setJournal(journal);
 
-  if (favoriteHeartActive) {
-    const foods = getSavedFoods();
-    foods.push({ name: name, points: points });
-    setSavedFoods(foods);
-    renderSavedFoods();
-  }
-
   renderJournal();
   updateDailyDisplay();
   clearFields();
@@ -786,8 +785,30 @@ function addToJournal() {
 /* ---------- Favorite Heart ---------- */
 
 function toggleFavoriteHeart() {
-  favoriteHeartActive = !favoriteHeartActive;
-  document.getElementById('favoriteHeart').classList.toggle('heart-active', favoriteHeartActive);
+  const name = document.getElementById('foodName').value.trim();
+  const points = parseFloat(document.getElementById('calcPoints').value);
+
+  if (!name) {
+    alert('Enter a name for this food.');
+    return;
+  }
+  if (isNaN(points)) {
+    alert('Calculate points first (or enter a points value).');
+    return;
+  }
+
+  const foods = getSavedFoods();
+  const alreadySaved = foods.some(food => food.name === name && food.points === points);
+
+  if (!alreadySaved) {
+    foods.push({ name: name, points: points });
+    setSavedFoods(foods);
+    renderSavedFoods();
+    saveToCloud();
+  }
+
+  favoriteHeartActive = true;
+  document.getElementById('favoriteHeart').classList.add('heart-active');
 }
 
 function deleteJournalEntry(index) {
@@ -985,6 +1006,9 @@ document.getElementById('allowance').addEventListener('input', function () {
   updateDailyDisplay();
   saveToCloud();
 });
+
+document.getElementById('foodName').addEventListener('input', resetFavoriteHeart);
+document.getElementById('calcPoints').addEventListener('input', resetFavoriteHeart);
 
 /* ---------- Saved Foods (favorites) ---------- */
 
