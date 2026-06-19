@@ -244,6 +244,7 @@ button:hover {
 }
 .journal-row {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
   padding: 10px 0;
@@ -287,12 +288,13 @@ button:hover {
   margin-left: 8px;
 }
 .food-actions button,
-.journal-meal-body .food-actions button {
+.food-actions button:hover {
   width: auto !important;
-  display: inline-block !important;
-  margin: 0;
-  padding: 8px 12px;
-  font-size: 14px;
+  display: inline-flex !important;
+  margin: 0 !important;
+  padding: 8px 12px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
 }
 .add-food-btn {
   background-color: #4CAF50;
