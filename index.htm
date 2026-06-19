@@ -287,14 +287,16 @@ button:hover {
   gap: 6px;
   margin-left: 8px;
 }
-.food-actions button,
-.food-actions button:hover {
-  width: auto !important;
-  display: inline-flex !important;
-  margin: 0 !important;
-  padding: 8px 12px !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
+.action-btn {
+  display: inline-block;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
 }
 .add-food-btn {
   background-color: #4CAF50;
@@ -943,13 +945,13 @@ function renderJournal() {
       const actions = document.createElement('div');
       actions.className = 'food-actions';
 
-      const editBtn = document.createElement('button');
-      editBtn.className = 'edit-food-btn';
+      const editBtn = document.createElement('span');
+      editBtn.className = 'edit-food-btn action-btn';
       editBtn.innerText = 'Edit';
       editBtn.onclick = () => editJournalEntry(index);
 
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'delete-food-btn';
+      const deleteBtn = document.createElement('span');
+      deleteBtn.className = 'delete-food-btn action-btn';
       deleteBtn.innerText = 'Delete';
       deleteBtn.onclick = () => deleteJournalEntry(index);
 
