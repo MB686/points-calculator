@@ -40,18 +40,40 @@ h2 {
   color: #333;
   font-size: 18px;
 }
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 92%;
+  margin: 0 auto 15px;
+}
+.panel-header h2 {
+  width: auto;
+  margin: 0;
+}
+.help-btn {
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  background-color: white;
+  color: #555;
+  font-size: 16px;
+  line-height: 1;
+}
+.help-btn:hover {
+  background-color: white;
+  border-color: #4CAF50;
+  color: #4CAF50;
+}
 .section-hint {
   width: 92%;
   margin: -10px auto 15px;
   text-align: center;
   color: #999;
-  font-size: 14px;
-}
-.calc-hint {
-  width: 92%;
-  margin: 16px auto 4px;
-  text-align: center;
-  color: #555;
   font-size: 14px;
 }
 .section-divider {
@@ -514,6 +536,44 @@ button:hover {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+.help-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background-color: rgba(0, 0, 0, 0.35);
+  box-sizing: border-box;
+  z-index: 1100;
+}
+.help-modal.modal-visible {
+  display: flex;
+}
+.help-modal-content {
+  width: 100%;
+  max-width: 360px;
+  background-color: white;
+  border-radius: 8px;
+  padding: 18px;
+  box-sizing: border-box;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+}
+.help-modal-content h2 {
+  width: auto;
+  margin: 0 0 10px;
+  text-align: left;
+}
+.help-modal-content p {
+  margin: 0;
+  color: #555;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.help-modal-content button {
+  margin: 16px 0 0;
+  width: 100%;
+}
 .sync-box {
   background-color: white;
   border: 2px solid #ccc;
@@ -613,6 +673,11 @@ button:hover {
 
 <div class="tab-panel" id="tabPanel-calculator">
 
+<div class="panel-header">
+  <h2>Calculator</h2>
+  <button class="help-btn" onclick="openCalculatorHelp()" title="Calculator help" type="button">?</button>
+</div>
+
 <label for="calories">Calories:</label>
 <input type="number" id="calories" placeholder="Enter calories">
 
@@ -642,12 +707,18 @@ button:hover {
   <button class="meal-btn" id="mealBtn-Snack" onclick="selectMeal('Snack')" type="button">Snack</button>
 </div>
 
-<p class="calc-hint">Name the calculated food, then add it to your food journal. You can also type a points value directly without calculating, if you already know it. Click the heart icon to save the food and its value to your favorites list without adding it to today's journal.</p>
-
 <button id="addToJournalButton" onclick="addToJournal()">Add to Food Journal</button>
 
 <button id="clearButton" onclick="clearFields()">Clear</button>
 
+</div>
+
+<div class="help-modal" id="calculatorHelpModal" onclick="closeCalculatorHelp(event)">
+  <div class="help-modal-content">
+    <h2>Calculator Help</h2>
+    <p>Enter nutrition info to calculate points, or type points directly if you already know them. Choose a meal to log it, or tap the heart to save it to Favorites.</p>
+    <button onclick="closeCalculatorHelp()" type="button">OK</button>
+  </div>
 </div>
 
 <div class="tab-panel active" id="tabPanel-journal">
@@ -716,6 +787,15 @@ function switchTab(tabName) {
 
   document.getElementById('tabPanel-' + tabName).classList.add('active');
   document.getElementById('tabBtn-' + tabName).classList.add('active');
+}
+
+function openCalculatorHelp() {
+  document.getElementById('calculatorHelpModal').classList.add('modal-visible');
+}
+
+function closeCalculatorHelp(event) {
+  if (event && event.target.id !== 'calculatorHelpModal') return;
+  document.getElementById('calculatorHelpModal').classList.remove('modal-visible');
 }
 
 /* ---------- Firebase setup ---------- */
