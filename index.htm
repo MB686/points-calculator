@@ -923,7 +923,7 @@ function renderJournal() {
   journalBox.style.border = 'none';
   journalBox.style.padding = '0';
 
-  const mealOrder = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
+  const mealOrder = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Uncategorized'];
 
   mealOrder.forEach(meal => {
     const entries = journal
@@ -1065,7 +1065,7 @@ function addSavedFood(index) {
   if (!food) return;
 
   const journal = getJournal();
-  journal.unshift({ name: food.name, points: food.points, meal: 'Snack' });
+  journal.unshift({ name: food.name, points: food.points });
   setJournal(journal);
 
   renderJournal();
