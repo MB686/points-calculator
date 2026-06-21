@@ -1189,7 +1189,7 @@ function renderSavedFoods() {
 
       const pickerTitle = document.createElement('div');
       pickerTitle.className = 'favorite-meal-picker-title';
-      pickerTitle.innerText = 'Add to which meal?';
+      pickerTitle.innerText = `Add ${food.name} to which meal?`;
       mealPicker.appendChild(pickerTitle);
 
       mealCategories.forEach(meal => {
