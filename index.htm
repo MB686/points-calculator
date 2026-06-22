@@ -678,14 +678,13 @@ button:hover {
 .allowance-calc-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 10px;
 }
 .allowance-calc-row label {
   display: block;
   margin: 0;
-  width: auto;
-  flex: 0 0 90px;
+  flex: 0 0 70px;
   font-size: 15px;
   font-weight: 600;
   color: #444;
@@ -693,6 +692,7 @@ button:hover {
 .allowance-calc-row input {
   flex: 1;
   min-width: 0;
+  max-width: 140px;
   width: auto !important;
   margin: 0;
   padding: 10px 12px;
@@ -700,11 +700,20 @@ button:hover {
   box-sizing: border-box;
 }
 .ac-short-input {
-  flex: 0 0 62px !important;
-  width: 62px !important;
+  flex: 0 0 70px !important;
+  width: 70px !important;
+  max-width: 70px;
+}
+.ac-unit-label {
+  flex: 0 0 auto;
+  font-size: 14px;
+  font-weight: 600;
+  color: #888;
 }
 .allowance-calc-row select {
   flex: 1;
+  min-width: 0;
+  max-width: 220px;
   padding: 10px 12px;
   font-size: 15px;
   border: 2px solid #ccc;
@@ -718,32 +727,6 @@ button:hover {
   outline: none;
   border-color: #4CAF50;
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
-}
-.allowance-calc-unit {
-  flex: 0 0 auto;
-  display: flex;
-  gap: 6px;
-}
-.allowance-calc-unit button {
-  width: auto;
-  margin: 0;
-  padding: 10px 14px;
-  font-size: 14px;
-  font-weight: 600;
-  background-color: white;
-  color: #666;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-}
-.allowance-calc-unit button.unit-active {
-  background-color: #4CAF50;
-  border-color: #4CAF50;
-  color: white;
-}
-.allowance-calc-unit button:hover:not(.unit-active) {
-  border-color: #4CAF50;
-  color: #4CAF50;
-  background-color: white;
 }
 .allowance-calc-result {
   display: flex;
@@ -931,25 +914,15 @@ button:hover {
   <div class="allowance-calc-row">
     <label for="acWeight">Weight:</label>
     <input type="number" id="acWeight" placeholder="e.g. 185" oninput="calcDailyAllowance()">
-    <div class="allowance-calc-unit">
-      <button id="acWeightLbs" class="unit-active" onclick="setWeightUnit('lbs')" type="button">lbs</button>
-      <button id="acWeightKg" onclick="setWeightUnit('kg')" type="button">kg</button>
-    </div>
+    <span class="ac-unit-label">lbs</span>
   </div>
 
-  <div class="allowance-calc-row" id="acHeightImperialRow">
+  <div class="allowance-calc-row">
     <label>Height:</label>
     <input type="number" id="acHeightFt" placeholder="ft" class="ac-short-input" oninput="calcDailyAllowance()">
+    <span class="ac-unit-label">ft</span>
     <input type="number" id="acHeightIn" placeholder="in" class="ac-short-input" oninput="calcDailyAllowance()">
-    <div class="allowance-calc-unit">
-      <button id="acHeightImperial" class="unit-active" onclick="setHeightUnit('imperial')" type="button">ft</button>
-      <button id="acHeightCm" onclick="setHeightUnit('cm')" type="button">cm</button>
-    </div>
-  </div>
-  <div class="allowance-calc-row" id="acHeightCmRow" style="display:none">
-    <label for="acHeightCmVal">Height:</label>
-    <input type="number" id="acHeightCmVal" placeholder="e.g. 170" oninput="calcDailyAllowance()">
-    <div style="flex:0 0 auto;font-size:14px;color:#888">cm</div>
+    <span class="ac-unit-label">in</span>
   </div>
 
   <div class="allowance-calc-row">
@@ -1056,41 +1029,15 @@ let saveTimeout = null;
 
 /* ---------- Daily Allowance Calculator ---------- */
 
-let acWeightUnit = 'lbs';
-let acHeightUnit = 'imperial';
-
-function setWeightUnit(unit) {
-  acWeightUnit = unit;
-  document.getElementById('acWeightLbs').classList.toggle('unit-active', unit === 'lbs');
-  document.getElementById('acWeightKg').classList.toggle('unit-active', unit === 'kg');
-  calcDailyAllowance();
-}
-
-function setHeightUnit(unit) {
-  acHeightUnit = unit;
-  document.getElementById('acHeightImperial').classList.toggle('unit-active', unit === 'imperial');
-  document.getElementById('acHeightCm').classList.toggle('unit-active', unit === 'cm');
-  document.getElementById('acHeightCmRow').style.display = unit === 'cm' ? 'flex' : 'none';
-  document.getElementById('acHeightImperialRow').style.display = unit === 'imperial' ? 'flex' : 'none';
-  calcDailyAllowance();
-}
-
 function calcDailyAllowance() {
-  // Get weight in lbs
-  const weightRaw = parseFloat(document.getElementById('acWeight').value);
-  if (!weightRaw || weightRaw <= 0) { hideAcResult(); return; }
-  const weightLbs = acWeightUnit === 'kg' ? weightRaw * 2.20462 : weightRaw;
+  // Weight in lbs
+  const weightLbs = parseFloat(document.getElementById('acWeight').value);
+  if (!weightLbs || weightLbs <= 0) { hideAcResult(); return; }
 
-  // Get height
-  let totalInches = 0;
-  if (acHeightUnit === 'imperial') {
-    const ft = parseFloat(document.getElementById('acHeightFt').value) || 0;
-    const inches = parseFloat(document.getElementById('acHeightIn').value) || 0;
-    totalInches = (ft * 12) + inches;
-  } else {
-    const cm = parseFloat(document.getElementById('acHeightCmVal').value) || 0;
-    totalInches = cm / 2.54;
-  }
+  // Height in inches (ft + in)
+  const ft = parseFloat(document.getElementById('acHeightFt').value) || 0;
+  const inches = parseFloat(document.getElementById('acHeightIn').value) || 0;
+  const totalInches = (ft * 12) + inches;
   if (totalInches <= 0) { hideAcResult(); return; }
 
   const age = parseInt(document.getElementById('acAge').value);
@@ -1103,28 +1050,20 @@ function calcDailyAllowance() {
   if (activity === '') { hideAcResult(); return; }
 
   // Formula
-  // Step 1: gender base
   let points = gender === 'male' ? 8 : 2;
 
-  // Step 2: age
   if (age <= 26) points += 4;
   else if (age <= 37) points += 3;
   else if (age <= 47) points += 2;
   else if (age <= 57) points += 1;
-  // 58+ add 0
 
-  // Step 3: weight (first two digits of weight in lbs)
   points += Math.floor(weightLbs / 10);
 
-  // Step 4: height
-  if (totalInches < 60) points += 0;
-  else if (totalInches <= 69) points += 1;
-  else points += 2;
+  if (totalInches >= 70) points += 2;
+  else if (totalInches >= 60) points += 1;
 
-  // Step 5: activity
   points += parseInt(activity);
 
-  // Clamp 18–44
   points = Math.max(18, Math.min(44, points));
 
   document.getElementById('acResultValue').textContent = points;
