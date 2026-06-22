@@ -692,10 +692,16 @@ button:hover {
 }
 .allowance-calc-row input {
   flex: 1;
+  min-width: 0;
+  width: auto !important;
   margin: 0;
   padding: 10px 12px;
   font-size: 15px;
-  width: auto;
+  box-sizing: border-box;
+}
+.ac-short-input {
+  flex: 0 0 62px !important;
+  width: 62px !important;
 }
 .allowance-calc-row select {
   flex: 1;
@@ -932,8 +938,9 @@ button:hover {
   </div>
 
   <div class="allowance-calc-row" id="acHeightImperialRow">
-    <input type="number" id="acHeightFt" placeholder="ft" style="flex:0 0 60px" oninput="calcDailyAllowance()">
-    <input type="number" id="acHeightIn" placeholder="in" style="flex:0 0 60px" oninput="calcDailyAllowance()">
+    <label>Height:</label>
+    <input type="number" id="acHeightFt" placeholder="ft" class="ac-short-input" oninput="calcDailyAllowance()">
+    <input type="number" id="acHeightIn" placeholder="in" class="ac-short-input" oninput="calcDailyAllowance()">
     <div class="allowance-calc-unit">
       <button id="acHeightImperial" class="unit-active" onclick="setHeightUnit('imperial')" type="button">ft</button>
       <button id="acHeightCm" onclick="setHeightUnit('cm')" type="button">cm</button>
