@@ -235,20 +235,54 @@ button:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 12px;
-  background-color: #f0f0f0;
+  padding: 8px 12px;
   border-radius: 8px 8px 0 0;
   border: 2px solid #ccc;
   border-bottom: none;
+  background-color: #e8e8e8;
 }
 .journal-meal-header span:first-child {
-  font-weight: 600;
-  font-size: 14px;
-  color: #444;
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 .journal-meal-header span:last-child {
   font-size: 13px;
-  color: #888;
+  color: rgba(255,255,255,0.85);
+  font-weight: 600;
+}
+.journal-meal-header.meal-breakfast {
+  background-color: #E67E22;
+  border-color: #ca6f1e;
+}
+.journal-meal-header.meal-lunch {
+  background-color: #27AE60;
+  border-color: #1e8449;
+}
+.journal-meal-header.meal-dinner {
+  background-color: #2980B9;
+  border-color: #1f6897;
+}
+.journal-meal-header.meal-snack {
+  background-color: #8E44AD;
+  border-color: #73308e;
+}
+.journal-meal-group .journal-meal-body {
+  border-color: #ccc;
+}
+.journal-meal-group:has(.meal-breakfast) .journal-meal-body {
+  border-color: #ca6f1e;
+}
+.journal-meal-group:has(.meal-lunch) .journal-meal-body {
+  border-color: #1e8449;
+}
+.journal-meal-group:has(.meal-dinner) .journal-meal-body {
+  border-color: #1f6897;
+}
+.journal-meal-group:has(.meal-snack) .journal-meal-body {
+  border-color: #73308e;
 }
 .journal-meal-body {
   background-color: white;
@@ -1052,7 +1086,8 @@ function renderJournal() {
     group.className = 'journal-meal-group';
 
     const header = document.createElement('div');
-    header.className = 'journal-meal-header';
+    const mealClass = meal === 'Uncategorized' ? '' : ` meal-${meal.toLowerCase()}`;
+    header.className = 'journal-meal-header' + mealClass;
     header.innerHTML = `<span>${meal}</span><span>${subtotal} pts</span>`;
 
     const body = document.createElement('div');
