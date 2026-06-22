@@ -655,6 +655,133 @@ button:hover {
 #connectSyncButton:hover {
   background-color: #1976D2;
 }
+.allowance-calc-box {
+  background-color: white;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  padding: 15px 15px 10px;
+  width: 92%;
+  margin: 0 auto 20px;
+  box-sizing: border-box;
+}
+.allowance-calc-box h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+}
+.allowance-calc-box .calc-hint {
+  font-size: 13px;
+  color: #999;
+  margin: 0 0 14px;
+}
+.allowance-calc-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.allowance-calc-row label {
+  display: block;
+  margin: 0;
+  width: auto;
+  flex: 0 0 90px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #444;
+}
+.allowance-calc-row input {
+  flex: 1;
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 15px;
+  width: auto;
+}
+.allowance-calc-row select {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 15px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background-color: white;
+  color: #333;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.allowance-calc-row select:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+.allowance-calc-unit {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 6px;
+}
+.allowance-calc-unit button {
+  width: auto;
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  background-color: white;
+  color: #666;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+}
+.allowance-calc-unit button.unit-active {
+  background-color: #4CAF50;
+  border-color: #4CAF50;
+  color: white;
+}
+.allowance-calc-unit button:hover:not(.unit-active) {
+  border-color: #4CAF50;
+  color: #4CAF50;
+  background-color: white;
+}
+.allowance-calc-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f0f7f0;
+  border: 2px solid #4CAF50;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-top: 14px;
+}
+.allowance-calc-result .result-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2e7d32;
+}
+.allowance-calc-result .result-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: #2e7d32;
+}
+#useAllowanceBtn {
+  width: auto;
+  margin: 0;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+}
+#useAllowanceBtn:hover {
+  background-color: #45a049;
+}
+.section-label-sm {
+  width: 92%;
+  margin: 0 auto 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #555;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
 .tab-bar {
   display: flex;
   width: 92%;
@@ -787,7 +914,74 @@ button:hover {
 
 <div class="tab-panel" id="tabPanel-settings">
 
-<h2>Sync Across Devices</h2>
+<h2>Settings</h2>
+
+<p class="section-label-sm">Daily Allowance Calculator</p>
+
+<div class="allowance-calc-box">
+  <h3>Estimate Your Daily Points</h3>
+  <p class="calc-hint">Based on the Weight Watchers PointsPlus formula (2010–2015)</p>
+
+  <div class="allowance-calc-row">
+    <label for="acWeight">Weight:</label>
+    <input type="number" id="acWeight" placeholder="e.g. 185" oninput="calcDailyAllowance()">
+    <div class="allowance-calc-unit">
+      <button id="acWeightLbs" class="unit-active" onclick="setWeightUnit('lbs')" type="button">lbs</button>
+      <button id="acWeightKg" onclick="setWeightUnit('kg')" type="button">kg</button>
+    </div>
+  </div>
+
+  <div class="allowance-calc-row" id="acHeightImperialRow">
+    <input type="number" id="acHeightFt" placeholder="ft" style="flex:0 0 60px" oninput="calcDailyAllowance()">
+    <input type="number" id="acHeightIn" placeholder="in" style="flex:0 0 60px" oninput="calcDailyAllowance()">
+    <div class="allowance-calc-unit">
+      <button id="acHeightImperial" class="unit-active" onclick="setHeightUnit('imperial')" type="button">ft</button>
+      <button id="acHeightCm" onclick="setHeightUnit('cm')" type="button">cm</button>
+    </div>
+  </div>
+  <div class="allowance-calc-row" id="acHeightCmRow" style="display:none">
+    <label for="acHeightCmVal">Height:</label>
+    <input type="number" id="acHeightCmVal" placeholder="e.g. 170" oninput="calcDailyAllowance()">
+    <div style="flex:0 0 auto;font-size:14px;color:#888">cm</div>
+  </div>
+
+  <div class="allowance-calc-row">
+    <label for="acAge">Age:</label>
+    <input type="number" id="acAge" placeholder="e.g. 35" oninput="calcDailyAllowance()">
+  </div>
+
+  <div class="allowance-calc-row">
+    <label>Gender:</label>
+    <select id="acGender" onchange="calcDailyAllowance()">
+      <option value="">Select…</option>
+      <option value="female">Female</option>
+      <option value="male">Male</option>
+    </select>
+  </div>
+
+  <div class="allowance-calc-row">
+    <label>Activity:</label>
+    <select id="acActivity" onchange="calcDailyAllowance()">
+      <option value="">Select…</option>
+      <option value="0">Mostly sitting</option>
+      <option value="2">Mostly standing</option>
+      <option value="4">Mostly walking</option>
+      <option value="6">Physically hard work</option>
+    </select>
+  </div>
+
+  <div class="allowance-calc-result" id="acResult" style="display:none">
+    <div>
+      <div class="result-label">Estimated Daily Points</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="result-value" id="acResultValue">—</span>
+      <button id="useAllowanceBtn" onclick="applyCalculatedAllowance()" type="button">Use This</button>
+    </div>
+  </div>
+</div>
+
+<p class="section-label-sm">Sync Across Devices</p>
 
 <div class="sync-box">
   <p>Your Sync Code</p>
@@ -852,6 +1046,99 @@ let syncCode = null;
 let unsubscribeSync = null;
 let isApplyingRemote = false;
 let saveTimeout = null;
+
+/* ---------- Daily Allowance Calculator ---------- */
+
+let acWeightUnit = 'lbs';
+let acHeightUnit = 'imperial';
+
+function setWeightUnit(unit) {
+  acWeightUnit = unit;
+  document.getElementById('acWeightLbs').classList.toggle('unit-active', unit === 'lbs');
+  document.getElementById('acWeightKg').classList.toggle('unit-active', unit === 'kg');
+  calcDailyAllowance();
+}
+
+function setHeightUnit(unit) {
+  acHeightUnit = unit;
+  document.getElementById('acHeightImperial').classList.toggle('unit-active', unit === 'imperial');
+  document.getElementById('acHeightCm').classList.toggle('unit-active', unit === 'cm');
+  document.getElementById('acHeightCmRow').style.display = unit === 'cm' ? 'flex' : 'none';
+  document.getElementById('acHeightImperialRow').style.display = unit === 'imperial' ? 'flex' : 'none';
+  calcDailyAllowance();
+}
+
+function calcDailyAllowance() {
+  // Get weight in lbs
+  const weightRaw = parseFloat(document.getElementById('acWeight').value);
+  if (!weightRaw || weightRaw <= 0) { hideAcResult(); return; }
+  const weightLbs = acWeightUnit === 'kg' ? weightRaw * 2.20462 : weightRaw;
+
+  // Get height
+  let totalInches = 0;
+  if (acHeightUnit === 'imperial') {
+    const ft = parseFloat(document.getElementById('acHeightFt').value) || 0;
+    const inches = parseFloat(document.getElementById('acHeightIn').value) || 0;
+    totalInches = (ft * 12) + inches;
+  } else {
+    const cm = parseFloat(document.getElementById('acHeightCmVal').value) || 0;
+    totalInches = cm / 2.54;
+  }
+  if (totalInches <= 0) { hideAcResult(); return; }
+
+  const age = parseInt(document.getElementById('acAge').value);
+  if (!age || age < 17) { hideAcResult(); return; }
+
+  const gender = document.getElementById('acGender').value;
+  if (!gender) { hideAcResult(); return; }
+
+  const activity = document.getElementById('acActivity').value;
+  if (activity === '') { hideAcResult(); return; }
+
+  // Formula
+  // Step 1: gender base
+  let points = gender === 'male' ? 8 : 2;
+
+  // Step 2: age
+  if (age <= 26) points += 4;
+  else if (age <= 37) points += 3;
+  else if (age <= 47) points += 2;
+  else if (age <= 57) points += 1;
+  // 58+ add 0
+
+  // Step 3: weight (first two digits of weight in lbs)
+  points += Math.floor(weightLbs / 10);
+
+  // Step 4: height
+  if (totalInches < 60) points += 0;
+  else if (totalInches <= 69) points += 1;
+  else points += 2;
+
+  // Step 5: activity
+  points += parseInt(activity);
+
+  // Clamp 18–44
+  points = Math.max(18, Math.min(44, points));
+
+  document.getElementById('acResultValue').textContent = points;
+  document.getElementById('acResult').style.display = 'flex';
+}
+
+function hideAcResult() {
+  document.getElementById('acResult').style.display = 'none';
+}
+
+function applyCalculatedAllowance() {
+  const val = document.getElementById('acResultValue').textContent;
+  if (!val || val === '—') return;
+  const allowanceInput = document.getElementById('allowance');
+  allowanceInput.value = val;
+  localStorage.setItem('wwDailyAllowance', val);
+  updateDailyDisplay();
+  saveToCloud();
+  switchTab('journal');
+  showToast('Daily allowance set to ' + val + ' pts');
+}
 
 /* ---------- Calculator ---------- */
 
