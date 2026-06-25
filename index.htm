@@ -815,17 +815,17 @@ button:hover {
 <div class="toast-message" id="toastMessage" aria-live="polite"></div>
 
 <div class="tab-bar">
-  <button class="tab-btn active" id="tabBtn-journal" onclick="switchTab('journal')">Journal</button>
-  <button class="tab-btn" id="tabBtn-calculator" onclick="switchTab('calculator')">Calculator</button>
+  <button class="tab-btn active" id="tabBtn-calculator" onclick="switchTab('calculator')">Food Entry</button>
+  <button class="tab-btn" id="tabBtn-journal" onclick="switchTab('journal')">Journal</button>
   <button class="tab-btn" id="tabBtn-favorites" onclick="switchTab('favorites')">Favorites</button>
   <button class="tab-btn" id="tabBtn-settings" onclick="switchTab('settings')">Settings</button>
 </div>
 
-<div class="tab-panel" id="tabPanel-calculator">
+<div class="tab-panel active" id="tabPanel-calculator">
 
 <div class="panel-header">
-  <h2>Calculator</h2>
-  <button class="help-btn" onclick="openCalculatorHelp()" title="Calculator help" type="button">?</button>
+  <h2>Food Entry</h2>
+  <button class="help-btn" onclick="openCalculatorHelp()" title="Food Entry help" type="button">?</button>
 </div>
 
 <label for="calories">Calories:</label>
@@ -865,13 +865,13 @@ button:hover {
 
 <div class="help-modal" id="calculatorHelpModal" onclick="closeCalculatorHelp(event)">
   <div class="help-modal-content">
-    <h2>Calculator Help</h2>
+    <h2>Food Entry Help</h2>
     <p>Enter nutrition info to calculate points, or type points directly if you already know them. Choose a meal to log it, or tap the heart to save it to Favorites.</p>
     <button onclick="closeCalculatorHelp()" type="button">OK</button>
   </div>
 </div>
 
-<div class="tab-panel active" id="tabPanel-journal">
+<div class="tab-panel" id="tabPanel-journal">
 
 <h2>Today's Food Journal</h2>
 
