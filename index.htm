@@ -110,7 +110,16 @@ input::placeholder {
   color: #aaa;
 }
 .narrow-input {
-  width: 70px !important;
+  width: 50px !important;
+  text-align: center;
+}
+.narrow-input::-webkit-outer-spin-button,
+.narrow-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.narrow-input[type=number] {
+  -moz-appearance: textfield;
 }
 .centered-label {
   text-align: center;
