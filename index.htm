@@ -109,18 +109,7 @@ input:focus {
 input::placeholder {
   color: #aaa;
 }
-.narrow-input {
-  width: 50px !important;
-  text-align: center;
-}
-.narrow-input::-webkit-outer-spin-button,
-.narrow-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.narrow-input[type=number] {
-  -moz-appearance: textfield;
-}
+
 .centered-label {
   text-align: center;
 }
@@ -174,23 +163,57 @@ button:hover {
   background-color: white;
   border: 2px solid #ccc;
   border-radius: 8px;
-  padding: 15px;
+  padding: 16px 15px 14px;
   width: 92%;
   margin: 10px auto 12px;
   box-sizing: border-box;
+  text-align: center;
 }
-.tracker-row {
+.tracker-remaining-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #888;
+  margin-bottom: 4px;
+}
+.tracker-remaining-value {
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 14px;
+}
+.tracker-secondary {
   display: flex;
-  justify-content: space-between;
-  font-size: 17px;
-  padding: 4px 0;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  border-top: 1px solid #eee;
+  padding-top: 12px;
 }
-.tracker-row span:first-child {
-  color: #444;
-  font-weight: 600;
+.tracker-secondary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
 }
-.tracker-row span:last-child {
-  font-weight: bold;
+.tracker-secondary-divider {
+  width: 1px;
+  height: 36px;
+  background-color: #eee;
+}
+.tracker-secondary-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #aaa;
+  margin-bottom: 2px;
+}
+.tracker-secondary-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
 }
 .remaining-ok {
   color: #4CAF50;
@@ -884,12 +907,20 @@ button:hover {
 
 <h2>Today's Food Journal</h2>
 
-<label for="allowance" class="centered-label">Daily Allowance:</label>
-<input type="number" id="allowance" class="narrow-input" placeholder="e.g. 30">
-
 <div class="tracker-box">
-  <div class="tracker-row"><span>Used Today:</span><span id="usedToday">0</span></div>
-  <div class="tracker-row"><span>Remaining:</span><span id="remainingToday">0</span></div>
+  <div class="tracker-remaining-label">Points Remaining</div>
+  <div class="tracker-remaining-value"><span id="remainingToday">0</span></div>
+  <div class="tracker-secondary">
+    <div class="tracker-secondary-item">
+      <span class="tracker-secondary-label">Allowance</span>
+      <span class="tracker-secondary-value" id="allowanceDisplay">—</span>
+    </div>
+    <div class="tracker-secondary-divider"></div>
+    <div class="tracker-secondary-item">
+      <span class="tracker-secondary-label">Used Today</span>
+      <span class="tracker-secondary-value" id="usedToday">0</span>
+    </div>
+  </div>
 </div>
 
 <div class="journal-box">
@@ -1086,8 +1117,6 @@ function hideAcResult() {
 function applyCalculatedAllowance() {
   const val = document.getElementById('acResultValue').textContent;
   if (!val || val === '—') return;
-  const allowanceInput = document.getElementById('allowance');
-  allowanceInput.value = val;
   localStorage.setItem('wwDailyAllowance', val);
   updateDailyDisplay();
   saveToCloud();
@@ -1173,11 +1202,12 @@ function setJournal(journal) {
 }
 
 function updateDailyDisplay() {
-  const allowance = parseFloat(document.getElementById('allowance').value) || 0;
+  const allowance = parseFloat(localStorage.getItem('wwDailyAllowance')) || 0;
   const journal = getJournal();
   const used = journal.reduce((sum, item) => sum + item.points, 0);
   const remaining = allowance - used;
 
+  document.getElementById('allowanceDisplay').innerText = allowance || '—';
   document.getElementById('usedToday').innerText = used;
 
   const remainingEl = document.getElementById('remainingToday');
@@ -1431,11 +1461,7 @@ function renderJournal() {
   });
 }
 
-document.getElementById('allowance').addEventListener('input', function () {
-  localStorage.setItem('wwDailyAllowance', this.value);
-  updateDailyDisplay();
-  saveToCloud();
-});
+
 
 document.getElementById('foodName').addEventListener('input', resetFavoriteHeart);
 document.getElementById('calcPoints').addEventListener('input', resetFavoriteHeart);
@@ -1593,7 +1619,6 @@ function applyRemoteState(state) {
 
   if (state.allowance !== undefined) {
     localStorage.setItem('wwDailyAllowance', state.allowance);
-    document.getElementById('allowance').value = state.allowance;
   }
   if (state.dailyDate !== undefined) {
     localStorage.setItem('wwDailyDate', state.dailyDate);
@@ -1686,11 +1711,6 @@ function copySyncCode() {
 /* ---------- Init ---------- */
 
 checkNewDay();
-
-const savedAllowance = localStorage.getItem('wwDailyAllowance');
-if (savedAllowance !== null) {
-  document.getElementById('allowance').value = savedAllowance;
-}
 
 updateDailyDisplay();
 renderJournal();
