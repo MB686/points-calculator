@@ -1841,21 +1841,30 @@ function closeBarcodeScanner() {
 async function lookupBarcode(barcode) {
   showToast('Looking up barcode...');
   try {
-    var response = await fetch('https://world.openfoodfacts.org/api/v0/product/' + barcode + '.json');
+    var apiKey = 'rprBUAPRxXMXwsiaPcecYhxvZmpzIRRs1uBQ3WQF';
+    var response = await fetch(
+      'https://api.nal.usda.gov/fdc/v1/foods/search?api_key=' + apiKey +
+      '&query=' + barcode + '&dataType=Branded&pageSize=1'
+    );
     var data = await response.json();
 
-    if (data.status !== 1 || !data.product) {
+    if (!data.foods || data.foods.length === 0) {
       showToast('Food not found in database.');
       return;
     }
 
-    var product = data.product;
-    var name = product.product_name || product.abbreviated_product_name || '';
-    var nutriments = product.nutriments || {};
+    var food = data.foods[0];
+    var name = food.description || food.brandOwner || '';
+    var nutrients = food.foodNutrients || [];
 
-    var calories = Math.round(nutriments['energy-kcal_serving'] || nutriments['energy-kcal_100g'] || 0);
-    var fat      = Math.round((nutriments['fat_serving']   || nutriments['fat_100g']   || 0) * 10) / 10;
-    var fiber    = Math.round((nutriments['fiber_serving'] || nutriments['fiber_100g'] || 0) * 10) / 10;
+    function getNutrient(name) {
+      var n = nutrients.find(function(n) { return n.nutrientName === name; });
+      return n ? n.value : 0;
+    }
+
+    var calories = Math.round(getNutrient('Energy') || 0);
+    var fat      = Math.round((getNutrient('Total lipid (fat)') || 0) * 10) / 10;
+    var fiber    = Math.round((getNutrient('Fiber, total dietary') || 0) * 10) / 10;
 
     if (!calories && !fat) {
       showToast('Nutrition data not available for this product.');
