@@ -1781,11 +1781,18 @@ function openBarcodeScanner() {
   document.getElementById('scannerStatus').textContent = 'Starting camera...';
 
   if (typeof Quagga === 'undefined') {
-    document.getElementById('scannerStatus').textContent = 'Scanner failed to load. Check your connection.';
+    document.getElementById('scannerStatus').textContent = 'ERROR: Quagga library not loaded. Check internet connection.';
+    alert('Quagga not loaded. The scanner library failed to download.');
     return;
   }
 
-  const video = document.getElementById('scannerVideo');
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    document.getElementById('scannerStatus').textContent = 'ERROR: Camera API not available on this browser.';
+    alert('Camera not available. Try opening the file from a web server rather than directly from your file system (file://).');
+    return;
+  }
+
+  alert('Quagga loaded OK. Requesting camera...');
 
   navigator.mediaDevices.getUserMedia({
     video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
