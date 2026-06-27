@@ -1785,32 +1785,46 @@ function openBarcodeScanner() {
     return;
   }
 
-  Quagga.init({
-    inputStream: {
-      name: 'Live',
-      type: 'LiveStream',
-      target: document.getElementById('scannerVideo'),
-      constraints: { facingMode: 'environment' }
-    },
-    decoder: {
-      readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader']
-    },
-    locate: true
-  }, function(err) {
-    if (err) {
-      document.getElementById('scannerStatus').textContent = 'Error: ' + err;
-      return;
-    }
-    document.getElementById('scannerStatus').textContent = 'Scanning... hold steady over barcode';
-    Quagga.start();
-  });
+  var video = document.getElementById('scannerVideo');
 
-  Quagga.onDetected(function(result) {
-    var code = result.codeResult.code;
-    if (code) {
-      closeBarcodeScanner();
-      lookupBarcode(code);
-    }
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+  }).then(function(stream) {
+    video.srcObject = stream;
+    video.play();
+    document.getElementById('scannerStatus').textContent = 'Scanning... hold steady over barcode';
+
+    Quagga.init({
+      inputStream: {
+        name: 'Live',
+        type: 'LiveStream',
+        target: video,
+        constraints: { facingMode: { ideal: 'environment' } }
+      },
+      decoder: {
+        readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader']
+      },
+      locate: true,
+      numOfWorkers: 2,
+      frequency: 10
+    }, function(err) {
+      if (err) {
+        document.getElementById('scannerStatus').textContent = 'Decoder error: ' + err;
+        return;
+      }
+      Quagga.start();
+    });
+
+    Quagga.onDetected(function(result) {
+      var code = result.codeResult.code;
+      if (code) {
+        closeBarcodeScanner();
+        lookupBarcode(code);
+      }
+    });
+
+  }).catch(function(err) {
+    document.getElementById('scannerStatus').textContent = 'Camera error: ' + err.message;
   });
 }
 
@@ -1848,10 +1862,10 @@ async function lookupBarcode(barcode) {
       return;
     }
 
-    document.getElementById('foodName').value   = name;
-    document.getElementById('calories').value   = calories || '';
-    document.getElementById('fat').value        = fat      || '';
-    document.getElementById('fiber').value      = fiber    || '';
+    document.getElementById('foodName').value  = name;
+    document.getElementById('calories').value  = calories || '';
+    document.getElementById('fat').value       = fat      || '';
+    document.getElementById('fiber').value     = fiber    || '';
 
     calculatePoints();
     showToast(name ? 'Found: ' + name : 'Food found! Check values.');
