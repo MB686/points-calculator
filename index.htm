@@ -803,6 +803,25 @@ button:hover {
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
+.remaining-banner {
+  width: 92%;
+  margin: 10px auto 4px;
+  padding: 10px 16px;
+  background-color: white;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #555;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.remaining-banner span {
+  font-size: 18px;
+  font-weight: 800;
+}
 .tab-bar {
   display: flex;
   width: 92%;
@@ -854,6 +873,8 @@ button:hover {
 </div>
 
 <div class="tab-panel active" id="tabPanel-calculator">
+
+<div class="remaining-banner">Points Remaining: <span id="remainingBanner">—</span></div>
 
 <div class="panel-header">
   <h2>Food Entry</h2>
@@ -1213,6 +1234,10 @@ function updateDailyDisplay() {
   const remainingEl = document.getElementById('remainingToday');
   remainingEl.innerText = remaining;
   remainingEl.className = remaining >= 0 ? 'remaining-ok' : 'remaining-over';
+
+  const bannerEl = document.getElementById('remainingBanner');
+  bannerEl.innerText = allowance ? remaining : '—';
+  bannerEl.className = allowance ? (remaining >= 0 ? 'remaining-ok' : 'remaining-over') : '';
 }
 
 function addToJournal() {
