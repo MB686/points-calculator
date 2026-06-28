@@ -1550,7 +1550,7 @@ function deleteSavedFood(index) {
 }
 
 function renderSavedFoods() {
-  const foods = getSavedFoods();
+  const foods = getSavedFoods().slice().sort((a, b) => a.name.localeCompare(b.name));
   const container = document.getElementById('savedFoodsList');
   const emptyMessage = document.getElementById('noSavedFoods');
 
