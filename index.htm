@@ -1502,37 +1502,39 @@ document.getElementById('calcPoints').addEventListener('input', resetFavoriteHea
 
 /* ---------- Saved Foods (favorites) ---------- */
 
-let choosingMealForSavedFoodName = null;
+let choosingMealForSavedFoodIndex = null;
 const mealCategories = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
 
 function getSavedFoods() {
-  return JSON.parse(localStorage.getItem('wwSavedFoods') || '[]');
+  const foods = JSON.parse(localStorage.getItem('wwSavedFoods') || '[]');
+  return foods.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function setSavedFoods(foods) {
+  foods.sort((a, b) => a.name.localeCompare(b.name));
   localStorage.setItem('wwSavedFoods', JSON.stringify(foods));
 }
 
-function askSavedFoodMeal(name) {
-  choosingMealForSavedFoodName = name;
+function askSavedFoodMeal(index) {
+  choosingMealForSavedFoodIndex = index;
   renderSavedFoods();
 }
 
 function cancelSavedFoodMealChoice() {
-  choosingMealForSavedFoodName = null;
+  choosingMealForSavedFoodIndex = null;
   renderSavedFoods();
 }
 
-function addSavedFood(name, meal) {
+function addSavedFood(index, meal) {
   const foods = getSavedFoods();
-  const food = foods.find(f => f.name === name);
+  const food = foods[index];
   if (!food) return;
 
   const journal = getJournal();
   journal.unshift({ name: food.name, points: food.points, meal: meal });
   setJournal(journal);
 
-  choosingMealForSavedFoodName = null;
+  choosingMealForSavedFoodIndex = null;
   renderJournal();
   renderSavedFoods();
   updateDailyDisplay();
@@ -1540,16 +1542,17 @@ function addSavedFood(name, meal) {
   saveToCloud();
 }
 
-function deleteSavedFood(name) {
-  const foods = getSavedFoods().filter(f => f.name !== name);
+function deleteSavedFood(index) {
+  const foods = getSavedFoods();
+  foods.splice(index, 1);
   setSavedFoods(foods);
-  choosingMealForSavedFoodName = null;
+  choosingMealForSavedFoodIndex = null;
   renderSavedFoods();
   saveToCloud();
 }
 
 function renderSavedFoods() {
-  const foods = getSavedFoods().slice().sort((a, b) => a.name.localeCompare(b.name));
+  const foods = getSavedFoods();
   const container = document.getElementById('savedFoodsList');
   const emptyMessage = document.getElementById('noSavedFoods');
 
@@ -1585,12 +1588,12 @@ function renderSavedFoods() {
     const addBtn = document.createElement('button');
     addBtn.className = 'add-food-btn';
     addBtn.innerText = 'Add';
-    addBtn.onclick = () => askSavedFoodMeal(food.name);
+    addBtn.onclick = () => askSavedFoodMeal(index);
 
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'delete-food-btn';
     deleteBtn.innerText = 'Delete';
-    deleteBtn.onclick = () => deleteSavedFood(food.name);
+    deleteBtn.onclick = () => deleteSavedFood(index);
 
     actions.appendChild(addBtn);
     actions.appendChild(deleteBtn);
@@ -1599,7 +1602,7 @@ function renderSavedFoods() {
     item.appendChild(actions);
     container.appendChild(item);
 
-    if (choosingMealForSavedFoodName === food.name) {
+    if (choosingMealForSavedFoodIndex === index) {
       const mealPicker = document.createElement('div');
       mealPicker.className = 'favorite-meal-picker';
 
@@ -1612,7 +1615,7 @@ function renderSavedFoods() {
         const mealBtn = document.createElement('button');
         mealBtn.className = 'add-food-btn';
         mealBtn.innerText = meal;
-        mealBtn.onclick = () => addSavedFood(food.name, meal);
+        mealBtn.onclick = () => addSavedFood(index, meal);
         mealPicker.appendChild(mealBtn);
       });
 
