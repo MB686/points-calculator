@@ -221,42 +221,37 @@ button:hover {
 .remaining-over {
   color: #f44336;
 }
-.meal-selector {
+.meal-selector-row {
   display: flex;
-  gap: 6px;
+  align-items: center;
+  gap: 10px;
   width: 92%;
   margin: 12px auto 6px;
-}
-.meal-btn {
-  flex: 1;
-  width: auto;
-  margin: 0;
-  padding: 10px 4px;
-  background-color: white;
-  color: #666;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.meal-btn:hover {
-  border-color: #4CAF50;
-  color: #4CAF50;
-  background-color: white;
-}
-.meal-btn.meal-active {
-  background-color: #4CAF50;
-  border-color: #4CAF50;
-  color: white;
 }
 .meal-label {
-  display: block;
-  margin: 12px auto 6px;
   font-size: 17px;
   font-weight: 600;
-  width: 92%;
   color: #444;
+  flex: 0 0 auto;
+  margin: 0;
+}
+#mealSelect {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 15px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background-color: white;
+  color: #333;
+  appearance: none;
+  -webkit-appearance: none;
+  width: auto !important;
+  margin: 0;
+}
+#mealSelect:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76,175,80,0.2);
 }
 .journal-meal-group {
   width: 100%;
@@ -902,12 +897,15 @@ button:hover {
   </button>
 </div>
 
-<span class="meal-label">Meal:</span>
-<div class="meal-selector">
-  <button class="meal-btn" id="mealBtn-Breakfast" onclick="selectMeal('Breakfast')" type="button">Breakfast</button>
-  <button class="meal-btn" id="mealBtn-Lunch" onclick="selectMeal('Lunch')" type="button">Lunch</button>
-  <button class="meal-btn" id="mealBtn-Dinner" onclick="selectMeal('Dinner')" type="button">Dinner</button>
-  <button class="meal-btn" id="mealBtn-Snack" onclick="selectMeal('Snack')" type="button">Snack</button>
+<div class="meal-selector-row">
+  <label for="mealSelect" class="meal-label">Meal:</label>
+  <select id="mealSelect" onchange="selectMeal(this.value)">
+    <option value="">Select meal...</option>
+    <option value="Breakfast">Breakfast</option>
+    <option value="Lunch">Lunch</option>
+    <option value="Dinner">Dinner</option>
+    <option value="Snack">Snack</option>
+  </select>
 </div>
 
 <button id="addToJournalButton" onclick="addToJournal()">Add to Food Journal</button>
@@ -1167,9 +1165,7 @@ function calculatePoints() {
 }
 
 function selectMeal(meal) {
-  selectedMeal = meal;
-  document.querySelectorAll('.meal-btn').forEach(btn => btn.classList.remove('meal-active'));
-  document.getElementById('mealBtn-' + meal).classList.add('meal-active');
+  selectedMeal = meal || null;
 }
 
 function clearFields() {
@@ -1178,11 +1174,11 @@ function clearFields() {
   document.getElementById('fat').value = '';
   document.getElementById('fiber').value = '';
   document.getElementById('calcPoints').value = '';
+  document.getElementById('mealSelect').value = '';
   lastCalculatedPoints = null;
   favoriteHeartActive = false;
   document.getElementById('favoriteHeart').classList.remove('heart-active');
   selectedMeal = null;
-  document.querySelectorAll('.meal-btn').forEach(btn => btn.classList.remove('meal-active'));
 }
 
 function resetFavoriteHeart() {
