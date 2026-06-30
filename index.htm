@@ -222,10 +222,6 @@ button:hover {
   color: #f44336;
 }
 .meal-selector-row {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
   width: 92%;
   margin: 12px auto 6px;
 }
@@ -233,9 +229,7 @@ button:hover {
   font-size: 17px;
   font-weight: 600;
   color: #444;
-  flex: 0 0 auto;
-  margin: 0;
-  white-space: nowrap;
+  margin-right: 10px;
 }
 #mealSelect {
   flex: 0 0 auto;
@@ -894,9 +888,8 @@ button:hover {
 </div>
 
 <div class="meal-selector-row">
-  <label for="mealSelect" class="meal-label">Meal:</label>
-  <select id="mealSelect" onchange="selectMeal(this.value)" style="width:160px;padding:10px 12px;font-size:15px;border:2px solid #ccc;border-radius:8px;background-color:white;color:#333;margin:0;display:inline-block;">
-    <option value="">Select meal...</option>
+  <label for="mealSelect" style="display:inline;font-size:17px;font-weight:600;color:#444;margin-right:8px;">Meal:</label><select id="mealSelect" onchange="selectMeal(this.value)" style="width:120px;padding:10px 8px;font-size:15px;border:2px solid #ccc;border-radius:8px;background-color:white;color:#333;vertical-align:middle;">
+    <option value="">Select...</option>
     <option value="Breakfast">Breakfast</option>
     <option value="Lunch">Lunch</option>
     <option value="Dinner">Dinner</option>
