@@ -822,13 +822,6 @@ button:hover {
   font-size: 18px;
   font-weight: 800;
 }
-#scanBarcodeButton {
-  background-color: #2980B9;
-  margin-bottom: 20px;
-}
-#scanBarcodeButton:hover {
-  background-color: #2471a3;
-}
 .tab-bar {
   display: flex;
   width: 92%;
@@ -882,8 +875,6 @@ button:hover {
 <div class="tab-panel active" id="tabPanel-calculator">
 
 <div class="remaining-banner">Points Remaining: <span id="remainingBanner">—</span></div>
-
-<button id="scanBarcodeButton" onclick="openBarcodeScanner()" type="button">📷 Scan Barcode</button>
 
 <div class="panel-header">
   <h2>Food Entry</h2>
@@ -1761,131 +1752,5 @@ document.getElementById('syncCodeDisplay').innerText = syncCode;
 startSync(syncCode);
 </script>
 
-<!-- Barcode Scanner Modal -->
-<div id="scannerModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:9999; flex-direction:column; align-items:center; justify-content:center;">
-  <div style="color:white; font-size:18px; font-weight:700; margin-bottom:16px;">Point camera at barcode</div>
-  <div style="position:relative; width:100%; max-width:400px;">
-    <video id="scannerVideo" style="width:100%; border-radius:8px;" autoplay playsinline muted></video>
-    <canvas id="scannerCanvas" style="display:none;"></canvas>
-    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:70%; height:25%; border:3px solid #4CAF50; border-radius:8px; pointer-events:none;"></div>
-  </div>
-  <div id="scannerStatus" style="color:#aaa; font-size:14px; margin-top:16px; padding:0 20px; text-align:center;">Scanning...</div>
-  <button onclick="closeBarcodeScanner()" type="button" style="margin-top:24px; width:auto; padding:12px 32px; background:#333; color:white; border:2px solid #555; border-radius:8px; font-size:16px; cursor:pointer;">Cancel</button>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-<script>
-/* ---------- Barcode Scanner ---------- */
-
-function openBarcodeScanner() {
-  var modal = document.getElementById('scannerModal');
-  modal.style.display = 'flex';
-  document.getElementById('scannerStatus').textContent = 'Starting camera...';
-
-  if (typeof Quagga === 'undefined') {
-    document.getElementById('scannerStatus').textContent = 'Scanner library not loaded.';
-    return;
-  }
-
-  var video = document.getElementById('scannerVideo');
-
-  navigator.mediaDevices.getUserMedia({
-    video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
-  }).then(function(stream) {
-    video.srcObject = stream;
-    video.play();
-    document.getElementById('scannerStatus').textContent = 'Scanning... hold steady over barcode';
-
-    Quagga.init({
-      inputStream: {
-        name: 'Live',
-        type: 'LiveStream',
-        target: video,
-        constraints: { facingMode: { ideal: 'environment' } }
-      },
-      decoder: {
-        readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader']
-      },
-      locate: true,
-      numOfWorkers: 2,
-      frequency: 10
-    }, function(err) {
-      if (err) {
-        document.getElementById('scannerStatus').textContent = 'Decoder error: ' + err;
-        return;
-      }
-      Quagga.start();
-    });
-
-    Quagga.onDetected(function(result) {
-      var code = result.codeResult.code;
-      if (code) {
-        closeBarcodeScanner();
-        lookupBarcode(code);
-      }
-    });
-
-  }).catch(function(err) {
-    document.getElementById('scannerStatus').textContent = 'Camera error: ' + err.message;
-  });
-}
-
-function closeBarcodeScanner() {
-  document.getElementById('scannerModal').style.display = 'none';
-  try { Quagga.stop(); } catch(e) {}
-  var video = document.getElementById('scannerVideo');
-  if (video.srcObject) {
-    video.srcObject.getTracks().forEach(function(t) { t.stop(); });
-    video.srcObject = null;
-  }
-}
-
-async function lookupBarcode(barcode) {
-  showToast('Looking up barcode...');
-  try {
-    var apiKey = 'rprBUAPRxXMXwsiaPcecYhxvZmpzIRRs1uBQ3WQF';
-    var response = await fetch(
-      'https://api.nal.usda.gov/fdc/v1/foods/search?api_key=' + apiKey +
-      '&query=' + barcode + '&dataType=Branded&pageSize=1'
-    );
-    var data = await response.json();
-
-    if (!data.foods || data.foods.length === 0) {
-      showToast('Food not found in database.');
-      return;
-    }
-
-    var food = data.foods[0];
-    var name = food.description || food.brandOwner || '';
-    var nutrients = food.foodNutrients || [];
-
-    function getNutrient(name) {
-      var n = nutrients.find(function(n) { return n.nutrientName === name; });
-      return n ? n.value : 0;
-    }
-
-    var calories = Math.round(getNutrient('Energy') || 0);
-    var fat      = Math.round((getNutrient('Total lipid (fat)') || 0) * 10) / 10;
-    var fiber    = Math.round((getNutrient('Fiber, total dietary') || 0) * 10) / 10;
-
-    if (!calories && !fat) {
-      showToast('Nutrition data not available for this product.');
-      return;
-    }
-
-    document.getElementById('foodName').value  = name;
-    document.getElementById('calories').value  = calories || '';
-    document.getElementById('fat').value       = fat      || '';
-    document.getElementById('fiber').value     = fiber    || '';
-
-    calculatePoints();
-    showToast(name ? 'Found: ' + name : 'Food found! Check values.');
-
-  } catch(err) {
-    showToast('Error looking up food. Check connection.');
-    console.error(err);
-  }
-}
-</script>
 </body>
 </html>
