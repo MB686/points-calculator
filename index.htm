@@ -46,11 +46,18 @@ h2 {
   justify-content: center;
   gap: 8px;
   width: 92%;
-  margin: 18px auto 18px;
+  margin: 16px auto 10px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #eee;
 }
 .panel-header h2 {
   width: auto;
   margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #333;
+  text-transform: uppercase;
 }
 .help-btn {
   width: 28px;
@@ -788,23 +795,28 @@ button:hover {
   text-transform: uppercase;
 }
 .remaining-banner {
-  width: 92%;
-  margin: 10px auto 4px;
-  padding: 10px 16px;
   background-color: white;
   border: 2px solid #ccc;
   border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #555;
+  padding: 14px 15px 12px;
+  width: 92%;
+  margin: 10px auto 4px;
   box-sizing: border-box;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  text-align: center;
+}
+.remaining-banner-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #888;
+  margin-bottom: 4px;
 }
 .remaining-banner span {
-  font-size: 18px;
+  font-size: 48px;
   font-weight: 800;
+  line-height: 1;
+  display: block;
 }
 .tab-bar {
   display: flex;
@@ -858,7 +870,10 @@ button:hover {
 
 <div class="tab-panel active" id="tabPanel-calculator">
 
-<div class="remaining-banner">Points Remaining: <span id="remainingBanner">—</span></div>
+<div class="remaining-banner">
+  <div class="remaining-banner-label">Points Remaining</div>
+  <span id="remainingBanner" class="remaining-ok">—</span>
+</div>
 
 <div class="panel-header">
   <h2>Food Entry</h2>
