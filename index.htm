@@ -14,24 +14,70 @@ body {
   padding: 16px 8px;
   background-color: #f8f9fa;
 }
-h1 {
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 92%;
-  margin: 0 auto 4px;
-  text-align: center;
+  margin: 0 auto;
+}
+h1 {
+  margin: 0 0 4px 0;
+  text-align: left;
   color: #333;
   font-size: 36px;
   font-weight: 500;
   letter-spacing: -1px;
+  width: auto;
 }
 .tagline {
-  width: 92%;
-  margin: 0 auto 25px;
-  text-align: center;
+  margin: 0 0 20px 0;
+  text-align: left;
   font-size: 13px;
   color: #888;
   font-weight: 400;
   letter-spacing: 2px;
   text-transform: uppercase;
+  width: auto;
+}
+.hamburger-btn {
+  width: auto;
+  margin: 0;
+  padding: 8px 12px;
+  background: none;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  font-size: 22px;
+  color: #555;
+  cursor: pointer;
+  line-height: 1;
+  align-self: flex-start;
+  margin-top: 8px;
+}
+.hamburger-btn:hover {
+  border-color: #4CAF50;
+  color: #4CAF50;
+  background: none;
+}
+.hamburger-btn.active {
+  border-color: #4CAF50;
+  color: #4CAF50;
+  background-color: #f0f7f0;
+}
+.settings-drawer {
+  display: none;
+  width: 100%;
+  background: #fafafa;
+  border-bottom: 2px solid #e0e0e0;
+  box-sizing: border-box;
+  overflow-y: auto;
+  max-height: 70vh;
+}
+.settings-drawer.open {
+  display: block;
+}
+.settings-drawer-inner {
+  padding-bottom: 20px;
 }
 h2 {
   width: 92%;
@@ -927,115 +973,19 @@ button:hover {
 </head>
 <body>
 
-<h1><span style="color:#4CAF50;">T</span>racket</h1>
-<p class="tagline">track it. own it.</p>
+<div class="app-header">
+  <div>
+    <h1><span style="color:#4CAF50;">T</span>racket</h1>
+    <p class="tagline">track it. own it.</p>
+  </div>
+  <button class="hamburger-btn" onclick="toggleSettingsMenu()" id="hamburgerBtn" type="button">☰</button>
+</div>
 
 <div class="toast-message" id="toastMessage" aria-live="polite"></div>
 
-<div class="tab-bar">
-  <button class="tab-btn active" id="tabBtn-calculator" onclick="switchTab('calculator')">Food Entry</button>
-  <button class="tab-btn" id="tabBtn-journal" onclick="switchTab('journal')">Journal</button>
-  <button class="tab-btn" id="tabBtn-favorites" onclick="switchTab('favorites')">Favorites</button>
-  <button class="tab-btn" id="tabBtn-settings" onclick="switchTab('settings')">Settings</button>
-  <button class="tab-btn" id="tabBtn-history" onclick="switchTab('history')">History</button>
-</div>
-
-<div class="tab-panel active" id="tabPanel-calculator">
-
-<div class="remaining-banner">
-  <div class="remaining-banner-label">Points Remaining</div>
-  <span id="remainingBanner" class="remaining-ok">—</span>
-</div>
-
-<div class="panel-header">
-  <h2>Food Entry</h2>
-  <button class="help-btn" onclick="openCalculatorHelp()" title="Food Entry help" type="button">?</button>
-</div>
-
-<label for="calories">Calories:</label>
-<input type="number" id="calories" placeholder="Enter calories">
-
-<label for="fat">Fat (grams):</label>
-<input type="number" id="fat" placeholder="Enter fat grams">
-
-<label for="fiber">Fiber (grams):</label>
-<input type="number" id="fiber" placeholder="Enter fiber grams">
-
-<button onclick="calculatePoints()">Calculate</button>
-
-<div class="calc-result-row">
-  <input type="text" id="foodName" placeholder="Food name">
-  <input type="number" id="calcPoints" placeholder="Pts">
-  <button class="heart-btn" id="favoriteHeart" onclick="toggleFavoriteHeart()" title="Save to Saved Foods" type="button">
-    <svg viewBox="0 0 24 24">
-      <path class="heart-shape" d="M12 21s-7.5-4.6-10-9.3C0.4 8.6 1.7 5 5.2 4.1 7.6 3.5 9.8 4.6 12 7.2 14.2 4.6 16.4 3.5 18.8 4.1 22.3 5 23.6 8.6 22 11.7 19.5 16.4 12 21 12 21z"/>
-    </svg>
-  </button>
-</div>
-
-<div class="meal-selector-row">
-  <label for="mealSelect" style="display:inline;font-size:17px;font-weight:600;color:#444;margin-right:8px;">Meal:</label><select id="mealSelect" onchange="selectMeal(this.value)" style="width:auto;padding:10px 4px;font-size:15px;border:2px solid #ccc;border-radius:8px;background-color:white;color:#333;vertical-align:middle;">
-    <option value="">Select...</option>
-    <option value="Breakfast">Breakfast</option>
-    <option value="Lunch">Lunch</option>
-    <option value="Dinner">Dinner</option>
-    <option value="Snack">Snack</option>
-  </select>
-</div>
-
-<button id="addToJournalButton" onclick="addToJournal()">Add to Food Journal</button>
-
-<button id="clearButton" onclick="clearFields()">Clear</button>
-
-</div>
-
-<div class="help-modal" id="calculatorHelpModal" onclick="closeCalculatorHelp(event)">
-  <div class="help-modal-content">
-    <h2>Food Entry Help</h2>
-    <p>Enter nutrition info to calculate points, or type points directly if you already know them. Choose a meal to log it, or tap the heart to save it to Favorites.</p>
-    <button onclick="closeCalculatorHelp()" type="button">OK</button>
-  </div>
-</div>
-
-<div class="tab-panel" id="tabPanel-journal">
-
-<h2>Today's Food Journal</h2>
-
-<div class="tracker-box">
-  <div class="tracker-remaining-label">Points Remaining</div>
-  <div class="tracker-remaining-value"><span id="remainingToday">0</span></div>
-  <div class="tracker-secondary">
-    <div class="tracker-secondary-item">
-      <span class="tracker-secondary-label">Allowance</span>
-      <span class="tracker-secondary-value" id="allowanceDisplay">—</span>
-    </div>
-    <div class="tracker-secondary-divider"></div>
-    <div class="tracker-secondary-item">
-      <span class="tracker-secondary-label">Used Today</span>
-      <span class="tracker-secondary-value" id="usedToday">0</span>
-    </div>
-  </div>
-</div>
-
-<div class="journal-box">
-  <div id="journalList"></div>
-  <div id="noJournalItems">No foods logged yet today</div>
-</div>
-
-<button id="resetDayButton" onclick="resetDay()">Reset Day</button>
-
-</div>
-
-<div class="tab-panel" id="tabPanel-favorites">
-
-<h2>Saved Foods</h2>
-
-<div id="savedFoodsList"></div>
-<div id="noSavedFoods">No saved foods yet</div>
-
-</div>
-
-<div class="tab-panel" id="tabPanel-settings">
+<!-- Settings Drawer -->
+<div class="settings-drawer" id="settingsDrawer">
+  <div class="settings-drawer-inner" id="tabPanel-settings">
 
 <h2>Settings</h2>
 
@@ -1108,8 +1058,115 @@ button:hover {
 <input type="text" id="syncCodeInput" placeholder="e.g. AB12CD34">
 <button id="connectSyncButton" onclick="connectSyncCode()">Connect</button>
 
+  </div><!-- end settings-drawer-inner -->
+</div><!-- end settings-drawer -->
+
+<div class="tab-bar">
+  <button class="tab-btn active" id="tabBtn-calculator" onclick="switchTab('calculator')">Food Entry</button>
+  <button class="tab-btn" id="tabBtn-journal" onclick="switchTab('journal')">Journal</button>
+  <button class="tab-btn" id="tabBtn-favorites" onclick="switchTab('favorites')">Favorites</button>
+  <button class="tab-btn" id="tabBtn-history" onclick="switchTab('history')">History</button>
 </div>
 
+<!-- Food Entry Tab -->
+<div class="tab-panel active" id="tabPanel-calculator">
+
+<div class="remaining-banner">
+  <div class="remaining-banner-label">Points Remaining</div>
+  <span id="remainingBanner" class="remaining-ok">—</span>
+</div>
+
+<div class="panel-header">
+  <h2>Food Entry</h2>
+  <button class="help-btn" onclick="openCalculatorHelp()" title="Food Entry help" type="button">?</button>
+</div>
+
+<label for="calories">Calories:</label>
+<input type="number" id="calories" placeholder="Enter calories">
+
+<label for="fat">Fat (grams):</label>
+<input type="number" id="fat" placeholder="Enter fat grams">
+
+<label for="fiber">Fiber (grams):</label>
+<input type="number" id="fiber" placeholder="Enter fiber grams">
+
+<button onclick="calculatePoints()">Calculate</button>
+
+<div class="calc-result-row">
+  <input type="text" id="foodName" placeholder="Food name">
+  <input type="number" id="calcPoints" placeholder="Pts">
+  <button class="heart-btn" id="favoriteHeart" onclick="toggleFavoriteHeart()" title="Save to Saved Foods" type="button">
+    <svg viewBox="0 0 24 24">
+      <path class="heart-shape" d="M12 21s-7.5-4.6-10-9.3C0.4 8.6 1.7 5 5.2 4.1 7.6 3.5 9.8 4.6 12 7.2 14.2 4.6 16.4 3.5 18.8 4.1 22.3 5 23.6 8.6 22 11.7 19.5 16.4 12 21 12 21z"/>
+    </svg>
+  </button>
+</div>
+
+<div class="meal-selector-row">
+  <label for="mealSelect" style="display:inline;font-size:17px;font-weight:600;color:#444;margin-right:8px;">Meal:</label><select id="mealSelect" onchange="selectMeal(this.value)" style="width:auto;padding:10px 4px;font-size:15px;border:2px solid #ccc;border-radius:8px;background-color:white;color:#333;vertical-align:middle;">
+    <option value="">Select...</option>
+    <option value="Breakfast">Breakfast</option>
+    <option value="Lunch">Lunch</option>
+    <option value="Dinner">Dinner</option>
+    <option value="Snack">Snack</option>
+  </select>
+</div>
+
+<button id="addToJournalButton" onclick="addToJournal()">Add to Food Journal</button>
+
+<button id="clearButton" onclick="clearFields()">Clear</button>
+
+</div>
+
+<div class="help-modal" id="calculatorHelpModal" onclick="closeCalculatorHelp(event)">
+  <div class="help-modal-content">
+    <h2>Food Entry Help</h2>
+    <p>Enter nutrition info to calculate points, or type points directly if you already know them. Choose a meal to log it, or tap the heart to save it to Favorites.</p>
+    <button onclick="closeCalculatorHelp()" type="button">OK</button>
+  </div>
+</div>
+
+<!-- Journal Tab -->
+<div class="tab-panel" id="tabPanel-journal">
+
+<h2>Today's Food Journal</h2>
+
+<div class="tracker-box">
+  <div class="tracker-remaining-label">Points Remaining</div>
+  <div class="tracker-remaining-value"><span id="remainingToday">0</span></div>
+  <div class="tracker-secondary">
+    <div class="tracker-secondary-item">
+      <span class="tracker-secondary-label">Allowance</span>
+      <span class="tracker-secondary-value" id="allowanceDisplay">—</span>
+    </div>
+    <div class="tracker-secondary-divider"></div>
+    <div class="tracker-secondary-item">
+      <span class="tracker-secondary-label">Used Today</span>
+      <span class="tracker-secondary-value" id="usedToday">0</span>
+    </div>
+  </div>
+</div>
+
+<div class="journal-box">
+  <div id="journalList"></div>
+  <div id="noJournalItems">No foods logged yet today</div>
+</div>
+
+<button id="resetDayButton" onclick="resetDay()">Reset Day</button>
+
+</div>
+
+<!-- Favorites Tab -->
+<div class="tab-panel" id="tabPanel-favorites">
+
+<h2>Saved Foods</h2>
+
+<div id="savedFoodsList"></div>
+<div id="noSavedFoods">No saved foods yet</div>
+
+</div>
+
+<!-- History Tab -->
 <div class="tab-panel" id="tabPanel-history">
 
 <h2>Past Journals</h2>
@@ -1118,7 +1175,6 @@ button:hover {
 <div id="noHistory" style="text-align:center; color:#aaa; font-size:15px; margin-top:30px;">No past journals yet. Reset a day to start building history.</div>
 
 </div>
-
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -1132,12 +1188,24 @@ if ('serviceWorker' in navigator) {
 
 /* ---------- Tab Navigation ---------- */
 
+function toggleSettingsMenu() {
+  const drawer = document.getElementById('settingsDrawer');
+  const btn = document.getElementById('hamburgerBtn');
+  const isOpen = drawer.classList.contains('open');
+  drawer.classList.toggle('open', !isOpen);
+  btn.classList.toggle('active', !isOpen);
+}
+
 function switchTab(tabName) {
   document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
   document.getElementById('tabPanel-' + tabName).classList.add('active');
   document.getElementById('tabBtn-' + tabName).classList.add('active');
+
+  // Close settings drawer when switching tabs
+  document.getElementById('settingsDrawer').classList.remove('open');
+  document.getElementById('hamburgerBtn').classList.remove('active');
 
   if (tabName === 'history') renderHistory();
 }
@@ -1225,6 +1293,7 @@ function applyCalculatedAllowance() {
   localStorage.setItem('wwDailyAllowance', val);
   updateDailyDisplay();
   saveToCloud();
+  toggleSettingsMenu();
   switchTab('journal');
   showToast('Daily allowance set to ' + val + ' pts');
 }
