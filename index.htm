@@ -1950,8 +1950,22 @@ function saveToCloud() {
 
   clearTimeout(saveTimeout);
   saveTimeout = setTimeout(() => {
-    db.collection('syncData').doc(syncCode).set(getLocalState())
-      .catch((err) => console.error('Sync save failed', err));
+    const state = getLocalState();
+    const stateJson = JSON.stringify(state);
+
+    // Firestore has a 1MB document limit — if we're close, trim oldest history
+    if (stateJson.length > 900000) {
+      const keys = Object.keys(state.history).sort((a, b) => new Date(b) - new Date(a));
+      while (JSON.stringify(state).length > 900000 && keys.length > 0) {
+        delete state.history[keys.pop()];
+      }
+    }
+
+    db.collection('syncData').doc(syncCode).set(state)
+      .catch((err) => {
+        console.error('Sync save failed', err);
+        showToast('Sync failed — check connection.');
+      });
   }, 500);
 }
 
