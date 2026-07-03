@@ -1499,6 +1499,7 @@ function archiveToday() {
   }
 
   localStorage.setItem('wwHistory', JSON.stringify(history));
+  saveToCloud();
 }
 
 function getHistory() {
