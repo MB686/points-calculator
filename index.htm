@@ -818,6 +818,77 @@ button:hover {
   line-height: 1;
   display: block;
 }
+.history-day {
+  width: 92%;
+  margin: 0 auto 10px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.history-day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  user-select: none;
+}
+.history-day-header:hover {
+  background-color: #eee;
+}
+.history-day-date {
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+}
+.history-day-summary {
+  font-size: 13px;
+  color: #888;
+  font-weight: 600;
+}
+.history-day-chevron {
+  font-size: 12px;
+  color: #aaa;
+  transition: transform 0.2s;
+}
+.history-day-chevron.open {
+  transform: rotate(180deg);
+}
+.history-day-body {
+  display: none;
+  border-top: 1px solid #eee;
+}
+.history-day-body.open {
+  display: block;
+}
+.history-meal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: none;
+  border-radius: 0;
+}
+.history-food-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 14px;
+}
+.history-food-item:last-child {
+  border-bottom: none;
+}
+.history-food-name {
+  color: #333;
+}
+.history-food-pts {
+  color: #888;
+  font-weight: 600;
+}
 .tab-bar {
   display: flex;
   width: 92%;
@@ -866,6 +937,7 @@ button:hover {
   <button class="tab-btn" id="tabBtn-journal" onclick="switchTab('journal')">Journal</button>
   <button class="tab-btn" id="tabBtn-favorites" onclick="switchTab('favorites')">Favorites</button>
   <button class="tab-btn" id="tabBtn-settings" onclick="switchTab('settings')">Settings</button>
+  <button class="tab-btn" id="tabBtn-history" onclick="switchTab('history')">History</button>
 </div>
 
 <div class="tab-panel active" id="tabPanel-calculator">
@@ -1038,6 +1110,15 @@ button:hover {
 
 </div>
 
+<div class="tab-panel" id="tabPanel-history">
+
+<h2>Past Journals</h2>
+
+<div id="historyList"></div>
+<div id="noHistory" style="text-align:center; color:#aaa; font-size:15px; margin-top:30px;">No past journals yet. Reset a day to start building history.</div>
+
+</div>
+
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -1057,6 +1138,8 @@ function switchTab(tabName) {
 
   document.getElementById('tabPanel-' + tabName).classList.add('active');
   document.getElementById('tabBtn-' + tabName).classList.add('active');
+
+  if (tabName === 'history') renderHistory();
 }
 
 function openCalculatorHelp() {
@@ -1339,14 +1422,113 @@ function saveJournalEdit(index) {
   saveToCloud();
 }
 
+function archiveToday() {
+  const journal = getJournal();
+  if (journal.length === 0) return;
+
+  // Use the date the journal was started, not today's date
+  const journalDate = localStorage.getItem('wwDailyDate') || new Date().toDateString();
+  const history = getHistory();
+
+  history[journalDate] = journal;
+
+  // Trim to last 30 days
+  const keys = Object.keys(history).sort((a, b) => new Date(b) - new Date(a));
+  if (keys.length > 30) {
+    keys.slice(30).forEach(k => delete history[k]);
+  }
+
+  localStorage.setItem('wwHistory', JSON.stringify(history));
+}
+
+function getHistory() {
+  return JSON.parse(localStorage.getItem('wwHistory') || '{}');
+}
+
 function resetDay() {
   if (confirm("Clear today's food journal and start fresh?")) {
+    archiveToday();
     setJournal([]);
     localStorage.setItem('wwDailyDate', new Date().toDateString());
     renderJournal();
     updateDailyDisplay();
+    renderHistory();
     saveToCloud();
   }
+}
+
+function renderHistory() {
+  const history = getHistory();
+  const container = document.getElementById('historyList');
+  const emptyMsg = document.getElementById('noHistory');
+  container.innerHTML = '';
+
+  const keys = Object.keys(history).sort((a, b) => new Date(b) - new Date(a));
+
+  if (keys.length === 0) {
+    emptyMsg.style.display = 'block';
+    return;
+  }
+  emptyMsg.style.display = 'none';
+
+  keys.forEach(dateStr => {
+    const journal = history[dateStr];
+    const totalPts = journal.reduce((sum, f) => sum + f.points, 0);
+
+    // Format date nicely
+    const d = new Date(dateStr);
+    const formatted = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+    // Group by meal
+    const meals = {};
+    journal.forEach(item => {
+      const meal = item.meal || 'Uncategorized';
+      if (!meals[meal]) meals[meal] = [];
+      meals[meal].push(item);
+    });
+
+    const dayEl = document.createElement('div');
+    dayEl.className = 'history-day';
+
+    const header = document.createElement('div');
+    header.className = 'history-day-header';
+    header.innerHTML = `
+      <span class="history-day-date">${formatted}</span>
+      <span class="history-day-summary">${totalPts} pts</span>
+      <span class="history-day-chevron">▼</span>
+    `;
+
+    const body = document.createElement('div');
+    body.className = 'history-day-body';
+
+    const mealOrder = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Uncategorized'];
+    mealOrder.forEach(meal => {
+      if (!meals[meal]) return;
+      const mealPts = meals[meal].reduce((sum, f) => sum + f.points, 0);
+
+      const mealHeader = document.createElement('div');
+      mealHeader.className = 'history-meal-header journal-meal-header meal-' + meal.toLowerCase();
+      mealHeader.innerHTML = `<span>${meal}</span><span>${mealPts} pts</span>`;
+      body.appendChild(mealHeader);
+
+      meals[meal].forEach(food => {
+        const foodEl = document.createElement('div');
+        foodEl.className = 'history-food-item';
+        foodEl.innerHTML = `<span class="history-food-name">${food.name}</span><span class="history-food-pts">${food.points} pts</span>`;
+        body.appendChild(foodEl);
+      });
+    });
+
+    header.onclick = () => {
+      const isOpen = body.classList.contains('open');
+      body.classList.toggle('open', !isOpen);
+      header.querySelector('.history-day-chevron').classList.toggle('open', !isOpen);
+    };
+
+    dayEl.appendChild(header);
+    dayEl.appendChild(body);
+    container.appendChild(dayEl);
+  });
 }
 
 function renderJournal() {
@@ -1741,6 +1923,7 @@ checkNewDay();
 updateDailyDisplay();
 renderJournal();
 renderSavedFoods();
+renderHistory();
 
 syncCode = localStorage.getItem('wwSyncCode');
 if (!syncCode) {
