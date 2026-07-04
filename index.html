@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Tracket</title>
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+
+<div class="app-header">
+  <div>
+    <h1><span style="color:#4CAF50;">T</span>racket</h1>
+    <p class="tagline">track it. own it.</p>
+  </div>
+  <button class="hamburger-btn" onclick="toggleSettingsMenu()" id="hamburgerBtn" type="button">☰</button>
+</div>
+
+<div class="toast-message" id="toastMessage" aria-live="polite"></div>
+
+<!-- Settings Drawer -->
+<div class="settings-drawer" id="settingsDrawer">
+  <div class="settings-drawer-inner" id="tabPanel-settings">
+
+<h2>Settings</h2>
+
+<p class="section-label-sm">Daily Allowance Calculator</p>
+
+<div class="allowance-calc-box">
+  <h3>Estimate Your Daily Points</h3>
+  <p class="calc-hint">Based on the classic Weight Watchers formula (pre-2010)</p>
+
+  <div class="allowance-calc-row">
+    <label for="acWeight">Weight:</label>
+    <input type="number" id="acWeight" placeholder="e.g. 185" oninput="calcDailyAllowance()">
+    <span class="ac-unit-label">lbs</span>
+  </div>
+
+  <div class="allowance-calc-row">
+    <label>Height:</label>
+    <input type="number" id="acHeightFt" placeholder="ft" class="ac-short-input" oninput="calcDailyAllowance()">
+    <span class="ac-unit-label">ft</span>
+    <input type="number" id="acHeightIn" placeholder="in" class="ac-short-input" oninput="calcDailyAllowance()">
+    <span class="ac-unit-label">in</span>
+  </div>
+
+  <div class="allowance-calc-row">
+    <label for="acAge">Age:</label>
+    <input type="number" id="acAge" placeholder="e.g. 35" oninput="calcDailyAllowance()">
+  </div>
+
+  <div class="allowance-calc-row">
+    <label>Gender:</label>
+    <select id="acGender" onchange="calcDailyAllowance()">
+      <option value="">Select…</option>
+      <option value="female">Female</option>
+      <option value="male">Male</option>
+    </select>
+  </div>
+
+  <div class="allowance-calc-row">
+    <label>Activity:</label>
+    <select id="acActivity" onchange="calcDailyAllowance()">
+      <option value="">Select…</option>
+      <option value="0">Mostly sitting</option>
+      <option value="2">Mostly standing</option>
+      <option value="4">Mostly walking</option>
+      <option value="6">Physically hard work</option>
+    </select>
+  </div>
+
+  <div class="allowance-calc-result" id="acResult" style="display:none">
+    <div>
+      <div class="result-label">Estimated Daily Points</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="result-value" id="acResultValue">—</span>
+      <button id="useAllowanceBtn" onclick="applyCalculatedAllowance()" type="button">Use This</button>
+    </div>
+  </div>
+</div>
+
+<p class="section-label-sm">Sync Across Devices</p>
+
+<div class="sync-box">
+  <p>Your Sync Code</p>
+  <div class="sync-code-display" id="syncCodeDisplay">--------</div>
+  <button id="copyCodeButton" onclick="copySyncCode()">Copy Code</button>
+  <p id="syncStatus">Connecting...</p>
+</div>
+
+<label for="syncCodeInput">Enter a Sync Code From Another Device:</label>
+<input type="text" id="syncCodeInput" placeholder="e.g. AB12CD34">
+<button id="connectSyncButton" onclick="connectSyncCode()">Connect</button>
+
+  </div><!-- end settings-drawer-inner -->
+</div><!-- end settings-drawer -->
+
+<div class="tab-bar">
+  <button class="tab-btn active" id="tabBtn-calculator" onclick="switchTab('calculator')">Food Entry</button>
+  <button class="tab-btn" id="tabBtn-journal" onclick="switchTab('journal')">Journal</button>
+  <button class="tab-btn" id="tabBtn-favorites" onclick="switchTab('favorites')">Favorites</button>
+  <button class="tab-btn" id="tabBtn-history" onclick="switchTab('history')">History</button>
+</div>
+
+<!-- Food Entry Tab -->
+<div class="tab-panel active" id="tabPanel-calculator">
+
+<div class="remaining-banner">
+  <div class="remaining-banner-label">Points Remaining</div>
+  <span id="remainingBanner" class="remaining-ok">—</span>
+</div>
+
+<div class="panel-header">
+  <h2>Food Entry</h2>
+  <button class="help-btn" onclick="openCalculatorHelp()" title="Food Entry help" type="button">?</button>
+</div>
+
+<label for="calories">Calories:</label>
+<input type="number" id="calories" placeholder="Enter calories">
+
+<label for="fat">Fat (grams):</label>
+<input type="number" id="fat" placeholder="Enter fat grams">
+
+<label for="fiber">Fiber (grams):</label>
+<input type="number" id="fiber" placeholder="Enter fiber grams">
+
+<button onclick="calculatePoints()">Calculate</button>
+
+<div class="calc-result-row">
+  <input type="text" id="foodName" placeholder="Food name">
+  <input type="number" id="calcPoints" placeholder="Pts">
+  <button class="heart-btn" id="favoriteHeart" onclick="toggleFavoriteHeart()" title="Save to Saved Foods" type="button">
+    <svg viewBox="0 0 24 24">
+      <path class="heart-shape" d="M12 21s-7.5-4.6-10-9.3C0.4 8.6 1.7 5 5.2 4.1 7.6 3.5 9.8 4.6 12 7.2 14.2 4.6 16.4 3.5 18.8 4.1 22.3 5 23.6 8.6 22 11.7 19.5 16.4 12 21 12 21z"/>
+    </svg>
+  </button>
+</div>
+
+<div class="meal-selector-row">
+  <label for="mealSelect" style="display:inline;font-size:17px;font-weight:600;color:#444;margin-right:8px;">Meal:</label><select id="mealSelect" onchange="selectMeal(this.value)" style="width:auto;padding:10px 4px;font-size:15px;border:2px solid #ccc;border-radius:8px;background-color:white;color:#333;vertical-align:middle;">
+    <option value="">Select...</option>
+    <option value="Breakfast">Breakfast</option>
+    <option value="Lunch">Lunch</option>
+    <option value="Dinner">Dinner</option>
+    <option value="Snack">Snack</option>
+  </select>
+</div>
+
+<button id="addToJournalButton" onclick="addToJournal()">Add to Food Journal</button>
+
+<button id="clearButton" onclick="clearFields()">Clear</button>
+
+</div>
+
+<div class="help-modal" id="calculatorHelpModal" onclick="closeCalculatorHelp(event)">
+  <div class="help-modal-content">
+    <h2>Food Entry Help</h2>
+    <p>Enter nutrition info to calculate points, or type points directly if you already know them. Choose a meal to log it, or tap the heart to save it to Favorites.</p>
+    <button onclick="closeCalculatorHelp()" type="button">OK</button>
+  </div>
+</div>
+
+<!-- Journal Tab -->
+<div class="tab-panel" id="tabPanel-journal">
+
+<h2>Today's Food Journal</h2>
+
+<div class="tracker-box">
+  <div class="tracker-remaining-label">Points Remaining</div>
+  <div class="tracker-remaining-value"><span id="remainingToday">0</span></div>
+  <div class="tracker-secondary">
+    <div class="tracker-secondary-item">
+      <span class="tracker-secondary-label">Allowance</span>
+      <span class="tracker-secondary-value" id="allowanceDisplay">—</span>
+    </div>
+    <div class="tracker-secondary-divider"></div>
+    <div class="tracker-secondary-item">
+      <span class="tracker-secondary-label">Used Today</span>
+      <span class="tracker-secondary-value" id="usedToday">0</span>
+    </div>
+  </div>
+</div>
+
+<div class="journal-box">
+  <div id="journalList"></div>
+  <div id="noJournalItems">No foods logged yet today</div>
+</div>
+
+<button id="resetDayButton" onclick="resetDay()">Reset Day</button>
+
+</div>
+
+<!-- Favorites Tab -->
+<div class="tab-panel" id="tabPanel-favorites">
+
+<h2>Saved Foods</h2>
+
+<div id="savedFoodsList"></div>
+<div id="noSavedFoods">No saved foods yet</div>
+
+</div>
+
+<!-- History Tab -->
+<div class="tab-panel" id="tabPanel-history">
+
+<h2>Past Journals</h2>
+
+<div id="historyList"></div>
+<div id="noHistory" style="text-align:center; color:#aaa; font-size:15px; margin-top:30px;">No past journals yet. Reset a day to start building history.</div>
+
+</div>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script src="app.js"></script>
+
+</body>
+</html>
