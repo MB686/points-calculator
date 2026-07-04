@@ -414,13 +414,25 @@ function renderHistory() {
     const dayEl = document.createElement('div');
     dayEl.className = 'history-day';
 
-    const header = document.createElement('div');
+    const header = document.createElement('button');
+    header.type = 'button';
     header.className = 'history-day-header';
-    header.innerHTML = `
-      <span class="history-day-date">${formatted}</span>
-      <span class="history-day-summary">${totalPts} pts</span>
-      <span class="history-day-chevron">▼</span>
-    `;
+    header.setAttribute('aria-expanded', 'false');
+
+    const dateSpan = document.createElement('span');
+    dateSpan.className = 'history-day-date';
+    dateSpan.textContent = formatted;
+
+    const summarySpan = document.createElement('span');
+    summarySpan.className = 'history-day-summary';
+    summarySpan.textContent = `${totalPts} pts`;
+
+    const chevron = document.createElement('span');
+    chevron.className = 'history-day-chevron';
+    chevron.textContent = '▼';
+    chevron.setAttribute('aria-hidden', 'true');
+
+    header.append(dateSpan, summarySpan, chevron);
 
     const body = document.createElement('div');
     body.className = 'history-day-body';
@@ -432,13 +444,27 @@ function renderHistory() {
 
       const mealHeader = document.createElement('div');
       mealHeader.className = 'history-meal-header journal-meal-header meal-' + meal.toLowerCase();
-      mealHeader.innerHTML = `<span>${meal}</span><span>${mealPts} pts</span>`;
+
+      const mealNameSpan = document.createElement('span');
+      mealNameSpan.textContent = meal;
+      const mealPtsSpan = document.createElement('span');
+      mealPtsSpan.textContent = `${mealPts} pts`;
+      mealHeader.append(mealNameSpan, mealPtsSpan);
       body.appendChild(mealHeader);
 
       meals[meal].forEach(food => {
         const foodEl = document.createElement('div');
         foodEl.className = 'history-food-item';
-        foodEl.innerHTML = `<span class="history-food-name">${food.name}</span><span class="history-food-pts">${food.points} pts</span>`;
+
+        const foodNameSpan = document.createElement('span');
+        foodNameSpan.className = 'history-food-name';
+        foodNameSpan.textContent = food.name;
+
+        const foodPtsSpan = document.createElement('span');
+        foodPtsSpan.className = 'history-food-pts';
+        foodPtsSpan.textContent = `${food.points} pts`;
+
+        foodEl.append(foodNameSpan, foodPtsSpan);
         body.appendChild(foodEl);
       });
     });
@@ -446,7 +472,8 @@ function renderHistory() {
     header.onclick = () => {
       const isOpen = body.classList.contains('open');
       body.classList.toggle('open', !isOpen);
-      header.querySelector('.history-day-chevron').classList.toggle('open', !isOpen);
+      chevron.classList.toggle('open', !isOpen);
+      header.setAttribute('aria-expanded', String(!isOpen));
     };
 
     dayEl.appendChild(header);
@@ -568,14 +595,18 @@ function renderJournal() {
       actions.style.flexShrink = '0';
       actions.style.gap = '6px';
 
-      const editBtn = document.createElement('span');
-      editBtn.className = 'edit-food-btn action-btn';
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'edit-food-btn';
       editBtn.innerText = 'Edit';
+      editBtn.setAttribute('aria-label', `Edit ${item.name}`);
       editBtn.onclick = () => editJournalEntry(index);
 
-      const deleteBtn = document.createElement('span');
-      deleteBtn.className = 'delete-food-btn action-btn';
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.className = 'delete-food-btn';
       deleteBtn.innerText = 'Delete';
+      deleteBtn.setAttribute('aria-label', `Delete ${item.name}`);
       deleteBtn.onclick = () => deleteJournalEntry(index);
 
       actions.appendChild(editBtn);
