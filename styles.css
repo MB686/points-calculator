@@ -668,6 +668,28 @@ button:hover {
   margin: 16px 0 0;
   width: 100%;
 }
+.confirm-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+.confirm-modal-actions button {
+  width: auto;
+  flex: 1;
+  margin: 0;
+}
+.confirm-cancel-btn {
+  background-color: #9e9e9e;
+}
+.confirm-cancel-btn:hover {
+  background-color: #7e7e7e;
+}
+.confirm-danger-btn {
+  background-color: #f44336;
+}
+.confirm-danger-btn:hover {
+  background-color: #da190b;
+}
 .sync-box {
   background-color: white;
   border: 2px solid #ccc;

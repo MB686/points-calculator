@@ -164,6 +164,17 @@
   </div>
 </div>
 
+<div class="help-modal" id="confirmModal" onclick="confirmBackdrop(event)">
+  <div class="help-modal-content">
+    <h2 id="confirmTitle">Confirm</h2>
+    <p id="confirmMessage"></p>
+    <div class="confirm-modal-actions">
+      <button type="button" class="confirm-cancel-btn" onclick="resolveConfirm(false)">Cancel</button>
+      <button type="button" class="confirm-ok-btn" id="confirmOkBtn" onclick="resolveConfirm(true)">Confirm</button>
+    </div>
+  </div>
+</div>
+
 <!-- Journal Tab -->
 <div class="tab-panel" id="tabPanel-journal">
 
