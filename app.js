@@ -37,6 +37,36 @@ function closeCalculatorHelp(event) {
   document.getElementById('calculatorHelpModal').classList.remove('modal-visible');
 }
 
+/* ---------- Confirm Modal ---------- */
+
+let confirmResolver = null;
+
+function showConfirm(message, options = {}) {
+  document.getElementById('confirmTitle').innerText = options.title || 'Confirm';
+  document.getElementById('confirmMessage').innerText = message;
+
+  const okBtn = document.getElementById('confirmOkBtn');
+  okBtn.innerText = options.confirmText || 'Confirm';
+  okBtn.classList.toggle('confirm-danger-btn', !!options.danger);
+
+  document.getElementById('confirmModal').classList.add('modal-visible');
+
+  return new Promise((resolve) => { confirmResolver = resolve; });
+}
+
+function resolveConfirm(result) {
+  document.getElementById('confirmModal').classList.remove('modal-visible');
+  if (confirmResolver) {
+    const resolve = confirmResolver;
+    confirmResolver = null;
+    resolve(result);
+  }
+}
+
+function confirmBackdrop(event) {
+  if (event.target.id === 'confirmModal') resolveConfirm(false);
+}
+
 /* ---------- Firebase setup ---------- */
 const firebaseConfig = {
   apiKey: "AIzaSyDHdqTZVy3q56ZfzygZunPscViqA1utlzQ",
@@ -57,6 +87,7 @@ let syncCode = null;
 let unsubscribeSync = null;
 let isApplyingRemote = false;
 let saveTimeout = null;
+let syncTimeout = null;
 
 /* ---------- Daily Allowance Calculator ---------- */
 
@@ -215,11 +246,11 @@ function addToJournal() {
   const points = parseFloat(pointsInput.value);
 
   if (isNaN(points)) {
-    alert('Calculate points first (or enter a points value).');
+    showToast('Enter or calculate points first.');
     return;
   }
   if (!selectedMeal) {
-    alert('Please select a meal category (Breakfast, Lunch, Dinner, or Snack).');
+    showToast('Pick a meal category first.');
     return;
   }
 
@@ -232,6 +263,7 @@ function addToJournal() {
 
   renderJournal();
   updateDailyDisplay();
+  showToast('Added to ' + selectedMeal.toLowerCase());
   clearFields();
   saveToCloud();
 }
@@ -243,11 +275,11 @@ function toggleFavoriteHeart() {
   const points = parseFloat(document.getElementById('calcPoints').value);
 
   if (!name) {
-    alert('Enter a name for this food.');
+    showToast('Enter a name for this food.');
     return;
   }
   if (isNaN(points)) {
-    alert('Calculate points first (or enter a points value).');
+    showToast('Enter or calculate points first.');
     return;
   }
 
@@ -292,11 +324,11 @@ function saveJournalEdit(index) {
   const points = parseFloat(pointsInput.value);
 
   if (!name) {
-    alert('Food name cannot be empty.');
+    showToast('Food name cannot be empty.');
     return;
   }
   if (isNaN(points)) {
-    alert('Enter a valid points value.');
+    showToast('Enter a valid points value.');
     return;
   }
 
@@ -333,16 +365,20 @@ function getHistory() {
   return JSON.parse(localStorage.getItem('wwHistory') || '{}');
 }
 
-function resetDay() {
-  if (confirm("Clear today's food journal and start fresh?")) {
-    archiveToday();
-    setJournal([]);
-    localStorage.setItem('wwDailyDate', new Date().toDateString());
-    renderJournal();
-    updateDailyDisplay();
-    renderHistory();
-    saveToCloud();
-  }
+async function resetDay() {
+  const ok = await showConfirm(
+    "Clear today's food journal and start fresh? Today's entries will be saved to History.",
+    { title: 'Reset Day', confirmText: 'Reset Day', danger: true }
+  );
+  if (!ok) return;
+
+  archiveToday();
+  setJournal([]);
+  localStorage.setItem('wwDailyDate', new Date().toDateString());
+  renderJournal();
+  updateDailyDisplay();
+  renderHistory();
+  saveToCloud();
 }
 
 function renderHistory() {
@@ -740,29 +776,58 @@ function applyRemoteState(state) {
   isApplyingRemote = false;
 }
 
+function setSyncStatus(text) {
+  const el = document.getElementById('syncStatus');
+  if (el) el.innerText = text;
+}
+
 function startSync(code) {
   if (unsubscribeSync) {
     unsubscribeSync();
     unsubscribeSync = null;
   }
 
+  clearTimeout(syncTimeout);
+  if (navigator.onLine) {
+    setSyncStatus('Connecting\u2026');
+    // If the first snapshot never arrives, assume we're offline.
+    syncTimeout = setTimeout(() => {
+      setSyncStatus('Offline \u2014 changes saved on this device');
+    }, 8000);
+  } else {
+    setSyncStatus('Offline \u2014 changes saved on this device');
+  }
+
   const docRef = db.collection('syncData').doc(code);
 
   unsubscribeSync = docRef.onSnapshot(
     (doc) => {
+      clearTimeout(syncTimeout);
       if (doc.exists) {
         applyRemoteState(doc.data());
       } else {
         docRef.set(getLocalState()).catch((err) => console.error('Initial sync save failed', err));
       }
-      document.getElementById('syncStatus').innerText = 'Synced \u2713';
+      setSyncStatus('Synced \u2713');
     },
     (error) => {
-      document.getElementById('syncStatus').innerText = 'Sync error - check connection';
+      clearTimeout(syncTimeout);
+      setSyncStatus(navigator.onLine ? 'Sync error \u2014 tap Connect to retry' : 'Offline \u2014 changes saved on this device');
       console.error('Sync error:', error);
     }
   );
 }
+
+window.addEventListener('offline', () => {
+  setSyncStatus('Offline \u2014 changes saved on this device');
+});
+
+window.addEventListener('online', () => {
+  if (syncCode) {
+    setSyncStatus('Reconnecting\u2026');
+    startSync(syncCode);
+  }
+});
 
 function saveToCloud() {
   if (isApplyingRemote || !syncCode) return;
@@ -788,26 +853,29 @@ function saveToCloud() {
   }, 500);
 }
 
-function connectSyncCode() {
+async function connectSyncCode() {
   const input = document.getElementById('syncCodeInput');
   const newCode = input.value.trim().toUpperCase();
 
   if (!newCode) {
-    alert('Enter a sync code.');
+    showToast('Enter a sync code.');
     return;
   }
   if (newCode === syncCode) {
-    alert('That is already your current sync code.');
+    showToast('That is already your current sync code.');
     return;
   }
-  if (!confirm("Connecting will replace this device's data with the data from that sync code. Continue?")) {
-    return;
-  }
+
+  const ok = await showConfirm(
+    "Connecting will replace this device's data with the data from that sync code. Continue?",
+    { title: 'Connect Device', confirmText: 'Connect', danger: true }
+  );
+  if (!ok) return;
 
   syncCode = newCode;
   localStorage.setItem('wwSyncCode', syncCode);
   document.getElementById('syncCodeDisplay').innerText = syncCode;
-  document.getElementById('syncStatus').innerText = 'Connecting...';
+  setSyncStatus('Connecting\u2026');
   input.value = '';
 
   startSync(syncCode);
