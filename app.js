@@ -14,11 +14,16 @@ function toggleSettingsMenu() {
   btn.classList.toggle('active', !isOpen);
 }
 
-function switchTab(tabName) {
-  document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+function switchTab(tabName, direction) {
+  document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active', 'slide-from-left'));
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
-  document.getElementById('tabPanel-' + tabName).classList.add('active');
+  const panel = document.getElementById('tabPanel-' + tabName);
+  panel.classList.add('active');
+
+  // Slide from left when going back (swiping right), from right when going forward
+  if (direction === 'right') panel.classList.add('slide-from-left');
+
   document.getElementById('tabBtn-' + tabName).classList.add('active');
 
   // Close settings drawer when switching tabs
@@ -945,16 +950,13 @@ function getCurrentTabIndex() {
     const dx = e.changedTouches[0].clientX - touchStartX;
     const dy = e.changedTouches[0].clientY - touchStartY;
 
-    // Only trigger if horizontal swipe is dominant and long enough
     if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
 
     const current = getCurrentTabIndex();
     if (dx < 0) {
-      // Swipe left → next tab
-      if (current < tabOrder.length - 1) switchTab(tabOrder[current + 1]);
+      if (current < tabOrder.length - 1) switchTab(tabOrder[current + 1], 'left');
     } else {
-      // Swipe right → previous tab
-      if (current > 0) switchTab(tabOrder[current - 1]);
+      if (current > 0) switchTab(tabOrder[current - 1], 'right');
     }
   }, { passive: true });
 })();
