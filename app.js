@@ -79,15 +79,87 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const auth = firebase.auth();
 
+let currentUser = null;
 let lastCalculatedPoints = null;
 let favoriteHeartActive = false;
 let selectedMeal = null;
-let syncCode = null;
 let unsubscribeSync = null;
 let isApplyingRemote = false;
 let saveTimeout = null;
 let syncTimeout = null;
+
+/* ---------- Auth UI ---------- */
+
+function showLoginScreen() {
+  document.getElementById('loginScreen').style.display = 'flex';
+}
+
+function hideLoginScreen() {
+  document.getElementById('loginScreen').style.display = 'none';
+}
+
+function setLoginError(msg) {
+  document.getElementById('loginError').textContent = msg;
+}
+
+async function signInWithGoogle() {
+  setLoginError('');
+  const provider = new firebase.auth.GoogleAuthProvider();
+  try {
+    await auth.signInWithPopup(provider);
+  } catch (err) {
+    setLoginError(err.message);
+  }
+}
+
+async function signInWithEmail() {
+  setLoginError('');
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) { setLoginError('Enter email and password.'); return; }
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+  } catch (err) {
+    setLoginError(err.message);
+  }
+}
+
+async function signUpWithEmail() {
+  setLoginError('');
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) { setLoginError('Enter email and password.'); return; }
+  if (password.length < 6) { setLoginError('Password must be at least 6 characters.'); return; }
+  try {
+    await auth.createUserWithEmailAndPassword(email, password);
+  } catch (err) {
+    setLoginError(err.message);
+  }
+}
+
+async function signOutUser() {
+  const ok = await showConfirm('Are you sure you want to sign out?', { title: 'Sign Out', confirmText: 'Sign Out' });
+  if (!ok) return;
+  if (unsubscribeSync) { unsubscribeSync(); unsubscribeSync = null; }
+  await auth.signOut();
+}
+
+/* ---------- Auth State ---------- */
+
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    currentUser = user;
+    hideLoginScreen();
+    document.getElementById('accountEmail').textContent = user.email || user.displayName || 'Signed in';
+    initApp();
+  } else {
+    currentUser = null;
+    if (unsubscribeSync) { unsubscribeSync(); unsubscribeSync = null; }
+    showLoginScreen();
+  }
+});
 
 /* ---------- Daily Allowance Calculator ---------- */
 
@@ -757,15 +829,11 @@ function renderSavedFoods() {
   });
 }
 
-/* ---------- Cross-Device Sync ---------- */
+/* ---------- Cloud Sync ---------- */
 
-function generateSyncCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // avoids ambiguous chars like 0/O, 1/I
-  let code = '';
-  for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
+function getUserDocRef() {
+  if (!currentUser) return null;
+  return db.collection('userData').doc(currentUser.uid);
 }
 
 function getLocalState() {
@@ -812,24 +880,17 @@ function setSyncStatus(text) {
   if (el) el.innerText = text;
 }
 
-function startSync(code) {
-  if (unsubscribeSync) {
-    unsubscribeSync();
-    unsubscribeSync = null;
-  }
+function startSync() {
+  if (unsubscribeSync) { unsubscribeSync(); unsubscribeSync = null; }
+
+  const docRef = getUserDocRef();
+  if (!docRef) return;
 
   clearTimeout(syncTimeout);
-  if (navigator.onLine) {
-    setSyncStatus('Connecting\u2026');
-    // If the first snapshot never arrives, assume we're offline.
-    syncTimeout = setTimeout(() => {
-      setSyncStatus('Offline \u2014 changes saved on this device');
-    }, 8000);
-  } else {
-    setSyncStatus('Offline \u2014 changes saved on this device');
-  }
-
-  const docRef = db.collection('syncData').doc(code);
+  setSyncStatus('Connecting…');
+  syncTimeout = setTimeout(() => {
+    setSyncStatus('Offline — changes saved on this device');
+  }, 8000);
 
   unsubscribeSync = docRef.onSnapshot(
     (doc) => {
@@ -839,36 +900,28 @@ function startSync(code) {
       } else {
         docRef.set(getLocalState()).catch((err) => console.error('Initial sync save failed', err));
       }
-      setSyncStatus('Synced \u2713');
+      setSyncStatus('Synced ✓');
     },
     (error) => {
       clearTimeout(syncTimeout);
-      setSyncStatus(navigator.onLine ? 'Sync error \u2014 tap Connect to retry' : 'Offline \u2014 changes saved on this device');
+      setSyncStatus(navigator.onLine ? 'Sync error' : 'Offline — changes saved on this device');
       console.error('Sync error:', error);
     }
   );
 }
 
-window.addEventListener('offline', () => {
-  setSyncStatus('Offline \u2014 changes saved on this device');
-});
-
-window.addEventListener('online', () => {
-  if (syncCode) {
-    setSyncStatus('Reconnecting\u2026');
-    startSync(syncCode);
-  }
-});
-
 function saveToCloud() {
-  if (isApplyingRemote || !syncCode) return;
+  if (isApplyingRemote || !currentUser) return;
 
   clearTimeout(saveTimeout);
   saveTimeout = setTimeout(() => {
+    const docRef = getUserDocRef();
+    if (!docRef) return;
+
     const state = getLocalState();
     const stateJson = JSON.stringify(state);
 
-    // Firestore has a 1MB document limit — if we're close, trim oldest history
+    // Firestore 1MB limit — trim oldest history if needed
     if (stateJson.length > 900000) {
       const keys = Object.keys(state.history).sort((a, b) => new Date(b) - new Date(a));
       while (JSON.stringify(state).length > 900000 && keys.length > 0) {
@@ -876,65 +929,23 @@ function saveToCloud() {
       }
     }
 
-    db.collection('syncData').doc(syncCode).set(state)
-      .catch((err) => {
-        console.error('Sync save failed', err);
-        showToast('Sync failed — check connection.');
-      });
+    docRef.set(state).catch((err) => {
+      console.error('Sync save failed', err);
+      showToast('Sync failed — check connection.');
+    });
   }, 500);
 }
 
-async function connectSyncCode() {
-  const input = document.getElementById('syncCodeInput');
-  const newCode = input.value.trim().toUpperCase();
+window.addEventListener('offline', () => setSyncStatus('Offline — changes saved on this device'));
+window.addEventListener('online', () => { if (currentUser) startSync(); });
 
-  if (!newCode) {
-    showToast('Enter a sync code.');
-    return;
-  }
-  if (newCode === syncCode) {
-    showToast('That is already your current sync code.');
-    return;
-  }
+/* ---------- Init (called after auth) ---------- */
 
-  const ok = await showConfirm(
-    "Connecting will replace this device's data with the data from that sync code. Continue?",
-    { title: 'Connect Device', confirmText: 'Connect', danger: true }
-  );
-  if (!ok) return;
-
-  syncCode = newCode;
-  localStorage.setItem('wwSyncCode', syncCode);
-  document.getElementById('syncCodeDisplay').innerText = syncCode;
-  setSyncStatus('Connecting\u2026');
-  input.value = '';
-
-  startSync(syncCode);
+function initApp() {
+  checkNewDay();
+  updateDailyDisplay();
+  renderJournal();
+  renderSavedFoods();
+  renderHistory();
+  startSync();
 }
-
-function copySyncCode() {
-  if (!syncCode) return;
-  navigator.clipboard.writeText(syncCode).then(() => {
-    const status = document.getElementById('syncStatus');
-    const previous = status.innerText;
-    status.innerText = 'Copied!';
-    setTimeout(() => { status.innerText = previous; }, 1500);
-  });
-}
-
-/* ---------- Init ---------- */
-
-checkNewDay();
-
-updateDailyDisplay();
-renderJournal();
-renderSavedFoods();
-renderHistory();
-
-syncCode = localStorage.getItem('wwSyncCode');
-if (!syncCode) {
-  syncCode = generateSyncCode();
-  localStorage.setItem('wwSyncCode', syncCode);
-}
-document.getElementById('syncCodeDisplay').innerText = syncCode;
-startSync(syncCode);
