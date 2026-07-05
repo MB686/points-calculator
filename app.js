@@ -15,18 +15,22 @@ function toggleSettingsMenu() {
 }
 
 function switchTab(tabName, direction) {
-  document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active', 'slide-from-left'));
+  document.querySelectorAll('.tab-panel').forEach(panel => {
+    panel.classList.remove('active', 'animate-from-right', 'animate-from-left');
+  });
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
   const panel = document.getElementById('tabPanel-' + tabName);
   panel.classList.add('active');
 
-  // Slide from left when going back (swiping right), from right when going forward
-  if (direction === 'right') panel.classList.add('slide-from-left');
+  // Force reflow so browser registers the display:block before animating
+  void panel.offsetWidth;
+
+  if (direction === 'left') panel.classList.add('animate-from-right');
+  else if (direction === 'right') panel.classList.add('animate-from-left');
 
   document.getElementById('tabBtn-' + tabName).classList.add('active');
 
-  // Close settings drawer when switching tabs
   document.getElementById('settingsDrawer').classList.remove('open');
   document.getElementById('hamburgerBtn').classList.remove('active');
 
