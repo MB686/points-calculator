@@ -160,13 +160,13 @@
 </div>
 
 <div class="meal-selector-row">
-  <label for="mealSelect" style="display:inline;font-size:17px;font-weight:600;color:#444;margin-right:8px;">Meal:</label><select id="mealSelect" onchange="selectMeal(this.value)" style="width:auto;padding:10px 4px;font-size:15px;border:2px solid #ccc;border-radius:8px;background-color:white;color:#333;vertical-align:middle;">
-    <option value="">Select...</option>
-    <option value="Breakfast">Breakfast</option>
-    <option value="Lunch">Lunch</option>
-    <option value="Dinner">Dinner</option>
-    <option value="Snack">Snack</option>
-  </select>
+  <div class="meal-selector-label">Meal:</div>
+  <div class="meal-btn-grid">
+    <button type="button" class="meal-grid-btn" id="mealBtn-Breakfast" onclick="selectMeal('Breakfast')">Breakfast</button>
+    <button type="button" class="meal-grid-btn" id="mealBtn-Lunch" onclick="selectMeal('Lunch')">Lunch</button>
+    <button type="button" class="meal-grid-btn" id="mealBtn-Dinner" onclick="selectMeal('Dinner')">Dinner</button>
+    <button type="button" class="meal-grid-btn" id="mealBtn-Snack" onclick="selectMeal('Snack')">Snack</button>
+  </div>
 </div>
 
 <button id="addToJournalButton" onclick="addToJournal()">Add to Food Journal</button>

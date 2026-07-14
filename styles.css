@@ -270,22 +270,40 @@ button:hover {
   width: 92%;
   margin: 12px auto 6px;
 }
-.meal-label {
+.meal-selector-label {
   font-size: 17px;
   font-weight: 600;
   color: #444;
-  margin-right: 10px;
+  margin-bottom: 8px;
 }
-#mealSelect {
-  width: auto !important;
-  padding: 10px 8px;
-  font-size: 15px;
+.meal-btn-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.meal-grid-btn {
+  flex: 1 1 calc(50% - 6px);
+  width: auto;
+  margin: 0;
+  padding: 10px 6px;
+  font-size: 14px;
+  font-weight: 600;
+  background-color: white;
+  color: #666;
   border: 2px solid #ccc;
   border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+}
+.meal-grid-btn:hover {
+  border-color: #4CAF50;
+  color: #4CAF50;
   background-color: white;
-  color: #333;
-  margin: 0;
-  display: inline-block;
+}
+.meal-grid-btn.meal-active {
+  background-color: #4CAF50;
+  border-color: #4CAF50;
+  color: white;
 }
 .journal-meal-group {
   width: 100%;

@@ -252,6 +252,11 @@ function calculatePoints() {
 
 function selectMeal(meal) {
   selectedMeal = meal || null;
+  document.querySelectorAll('.meal-grid-btn').forEach(btn => btn.classList.remove('meal-active'));
+  if (meal) {
+    const btn = document.getElementById('mealBtn-' + meal);
+    if (btn) btn.classList.add('meal-active');
+  }
 }
 
 function clearFields() {
@@ -260,7 +265,7 @@ function clearFields() {
   document.getElementById('fat').value = '';
   document.getElementById('fiber').value = '';
   document.getElementById('calcPoints').value = '';
-  document.getElementById('mealSelect').value = '';
+  document.querySelectorAll('.meal-grid-btn').forEach(btn => btn.classList.remove('meal-active'));
   lastCalculatedPoints = null;
   favoriteHeartActive = false;
   document.getElementById('favoriteHeart').classList.remove('heart-active');
