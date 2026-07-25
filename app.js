@@ -33,8 +33,6 @@ function switchTab(tabName, direction) {
 
   document.getElementById('settingsDrawer').classList.remove('open');
   document.getElementById('hamburgerBtn').classList.remove('active');
-
-  if (tabName === 'history') renderHistory();
 }
 
 function openCalculatorHelp() {
@@ -565,14 +563,13 @@ async function resetDay() {
   localStorage.setItem('wwDailyDate', new Date().toDateString());
   renderJournal();
   updateDailyDisplay();
-  renderHistory();
   saveToCloud();
 }
 
 function renderHistory() {
-  const history = getHistory();
+  // History tab removed from UI — data still stored for autocomplete search
   const container = document.getElementById('historyList');
-  const emptyMsg = document.getElementById('noHistory');
+  if (!container) return;
   container.innerHTML = '';
 
   const keys = Object.keys(history).sort((a, b) => new Date(b) - new Date(a));
@@ -975,7 +972,6 @@ function applyRemoteState(state) {
   updateDailyDisplay();
   renderJournal();
   renderSavedFoods();
-  renderHistory();
 
   isApplyingRemote = false;
 }
@@ -1045,7 +1041,7 @@ function saveToCloud() {
 
 /* ---------- Swipe Navigation ---------- */
 
-const tabOrder = ['calculator', 'journal', 'favorites', 'history'];
+const tabOrder = ['calculator', 'journal', 'favorites'];
 
 function getCurrentTabIndex() {
   return tabOrder.findIndex(tab =>
@@ -1095,6 +1091,5 @@ function initApp() {
   updateDailyDisplay();
   renderJournal();
   renderSavedFoods();
-  renderHistory();
   startSync();
 }
