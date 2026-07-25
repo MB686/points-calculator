@@ -559,6 +559,56 @@ button:hover {
   flex: 2 1 0%;
   min-width: 0;
 }
+.autocomplete-wrap {
+  flex: 2 1 0%;
+  min-width: 0;
+  position: relative;
+}
+.autocomplete-wrap input {
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+}
+.suggestions-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #4CAF50;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  z-index: 100;
+  max-height: 220px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+.suggestions-dropdown.visible {
+  display: block;
+}
+.suggestion-item {
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+}
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+.suggestion-item:hover,
+.suggestion-item:active {
+  background-color: #f0f9f0;
+}
+.suggestion-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: #333;
+}
+.suggestion-meta {
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
 .calc-result-row input#calcPoints {
   flex: 0 0 60px;
   width: 60px;

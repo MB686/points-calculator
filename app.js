@@ -270,7 +270,108 @@ function clearFields() {
   favoriteHeartActive = false;
   document.getElementById('favoriteHeart').classList.remove('heart-active');
   selectedMeal = null;
+  hideSuggestions();
 }
+
+/* ---------- Food Name Autocomplete ---------- */
+
+function searchHistory(query) {
+  const dropdown = document.getElementById('foodSuggestions');
+
+  if (!query || query.length < 2) {
+    hideSuggestions();
+    return;
+  }
+
+  const q = query.toLowerCase();
+  const history = getHistory();
+  const matches = [];
+
+  // Search through all history days
+  Object.entries(history).forEach(([dateStr, entries]) => {
+    if (!Array.isArray(entries)) return;
+    entries.forEach(entry => {
+      if (entry.name && entry.name.toLowerCase().includes(q)) {
+        matches.push({
+          name: entry.name,
+          points: entry.points,
+          date: dateStr
+        });
+      }
+    });
+  });
+
+  // Also search today's journal
+  getJournal().forEach(entry => {
+    if (entry.name && entry.name.toLowerCase().includes(q)) {
+      matches.push({
+        name: entry.name,
+        points: entry.points,
+        date: 'Today'
+      });
+    }
+  });
+
+  if (matches.length === 0) {
+    hideSuggestions();
+    return;
+  }
+
+  // Sort by most recent first
+  matches.sort((a, b) => {
+    if (a.date === 'Today') return -1;
+    if (b.date === 'Today') return 1;
+    return new Date(b.date) - new Date(a.date);
+  });
+
+  dropdown.innerHTML = '';
+  matches.forEach(match => {
+    const item = document.createElement('div');
+    item.className = 'suggestion-item';
+
+    const name = document.createElement('div');
+    name.className = 'suggestion-name';
+    name.textContent = match.name;
+
+    const meta = document.createElement('div');
+    meta.className = 'suggestion-meta';
+    meta.textContent = `${match.points} pts · ${match.date}`;
+
+    item.appendChild(name);
+    item.appendChild(meta);
+
+    item.addEventListener('mousedown', (e) => {
+      e.preventDefault(); // prevent blur firing before click
+      selectSuggestion(match.name, match.points);
+    });
+
+    dropdown.appendChild(item);
+  });
+
+  dropdown.classList.add('visible');
+}
+
+function selectSuggestion(name, points) {
+  document.getElementById('foodName').value = name;
+  document.getElementById('calcPoints').value = points;
+  lastCalculatedPoints = points;
+  hideSuggestions();
+}
+
+function hideSuggestions() {
+  const dropdown = document.getElementById('foodSuggestions');
+  if (dropdown) {
+    dropdown.classList.remove('visible');
+    dropdown.innerHTML = '';
+  }
+}
+
+// Hide suggestions when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.autocomplete-wrap')) {
+    hideSuggestions();
+  }
+});
 
 function resetFavoriteHeart() {
   favoriteHeartActive = false;

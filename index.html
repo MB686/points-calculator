@@ -150,7 +150,10 @@
 <button onclick="calculatePoints()">Calculate</button>
 
 <div class="calc-result-row">
-  <input type="text" id="foodName" placeholder="Food name">
+  <div class="autocomplete-wrap">
+  <input type="text" id="foodName" placeholder="Food name" autocomplete="off" oninput="searchHistory(this.value)">
+  <div id="foodSuggestions" class="suggestions-dropdown"></div>
+</div>
   <input type="number" id="calcPoints" placeholder="Pts">
   <button class="heart-btn" id="favoriteHeart" onclick="toggleFavoriteHeart()" title="Save to Saved Foods" type="button">
     <svg viewBox="0 0 24 24">
