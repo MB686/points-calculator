@@ -315,15 +315,38 @@ function searchHistory(query) {
     return;
   }
 
+  // Deduplicate by name + points combo, keeping the most recent date
+  const uniqueMap = new Map();
+  matches.forEach(match => {
+    const key = match.name.toLowerCase() + '|' + match.points;
+    const existing = uniqueMap.get(key);
+    if (!existing) {
+      uniqueMap.set(key, match);
+      return;
+    }
+    // Prefer "Today" over any dated entry
+    if (match.date === 'Today') {
+      uniqueMap.set(key, match);
+      return;
+    }
+    if (existing.date === 'Today') return;
+    // Otherwise keep the more recent date
+    if (new Date(match.date) > new Date(existing.date)) {
+      uniqueMap.set(key, match);
+    }
+  });
+
+  const dedupedMatches = Array.from(uniqueMap.values());
+
   // Sort by most recent first
-  matches.sort((a, b) => {
+  dedupedMatches.sort((a, b) => {
     if (a.date === 'Today') return -1;
     if (b.date === 'Today') return 1;
     return new Date(b.date) - new Date(a.date);
   });
 
   dropdown.innerHTML = '';
-  matches.forEach(match => {
+  dedupedMatches.forEach(match => {
     const item = document.createElement('div');
     item.className = 'suggestion-item';
 
