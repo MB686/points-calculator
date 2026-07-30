@@ -56,8 +56,8 @@
 <p class="section-label-sm">Daily Allowance Calculator</p>
 
 <div class="allowance-calc-box">
-  <h3>Estimate Your Daily Points</h3>
-  <p class="calc-hint">Based on the classic Weight Watchers formula (pre-2010)</p>
+  <h3>Estimate Your Daily Units</h3>
+  <p class="calc-hint">Based on a classic calorie/fat/fiber formula</p>
 
   <div class="allowance-calc-row">
     <label for="acWeight">Weight:</label>
@@ -100,7 +100,7 @@
 
   <div class="allowance-calc-result" id="acResult" style="display:none">
     <div>
-      <div class="result-label">Estimated Daily Points</div>
+      <div class="result-label">Estimated Daily Units</div>
     </div>
     <div style="display:flex;align-items:center;gap:12px">
       <span class="result-value" id="acResultValue">—</span>
@@ -130,7 +130,7 @@
 <div class="tab-panel active" id="tabPanel-calculator">
 
 <div class="remaining-banner">
-  <div class="remaining-banner-label">Points Remaining</div>
+  <div class="remaining-banner-label">Units Remaining</div>
   <span id="remainingBanner" class="remaining-ok">—</span>
 </div>
 
@@ -155,7 +155,7 @@
   <input type="text" id="foodName" placeholder="Food name" autocomplete="off" oninput="searchHistory(this.value)">
   <div id="foodSuggestions" class="suggestions-dropdown"></div>
 </div>
-  <input type="number" id="calcPoints" placeholder="Pts">
+  <input type="number" id="calcPoints" placeholder="U">
   <button class="heart-btn" id="favoriteHeart" onclick="toggleFavoriteHeart()" title="Save to Saved Foods" type="button">
     <svg viewBox="0 0 24 24">
       <path class="heart-shape" d="M12 21s-7.5-4.6-10-9.3C0.4 8.6 1.7 5 5.2 4.1 7.6 3.5 9.8 4.6 12 7.2 14.2 4.6 16.4 3.5 18.8 4.1 22.3 5 23.6 8.6 22 11.7 19.5 16.4 12 21 12 21z"/>
@@ -182,7 +182,7 @@
 <div class="help-modal" id="calculatorHelpModal" onclick="closeCalculatorHelp(event)">
   <div class="help-modal-content">
     <h2>Food Entry Help</h2>
-    <p>Enter nutrition info to calculate points, or type points directly if you already know them. Choose a meal to log it, or tap the heart to save it to Favorites.</p>
+    <p>Enter nutrition info to calculate units, or type units directly if you already know them. Choose a meal to log it, or tap the heart to save it to Favorites.</p>
     <button onclick="closeCalculatorHelp()" type="button">OK</button>
   </div>
 </div>
@@ -204,7 +204,7 @@
 <h2>Today's Food Journal</h2>
 
 <div class="tracker-box">
-  <div class="tracker-remaining-label">Points Remaining</div>
+  <div class="tracker-remaining-label">Units Remaining</div>
   <div class="tracker-remaining-value"><span id="remainingToday">0</span></div>
   <div class="tracker-secondary">
     <div class="tracker-secondary-item">

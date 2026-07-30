@@ -224,7 +224,7 @@ function applyCalculatedAllowance() {
   saveToCloud();
   toggleSettingsMenu();
   switchTab('journal');
-  showToast('Daily allowance set to ' + val + ' pts');
+  showToast('Daily allowance set to ' + val + ' U');
 }
 
 /* ---------- Calculator ---------- */
@@ -356,7 +356,7 @@ function searchHistory(query) {
 
     const meta = document.createElement('div');
     meta.className = 'suggestion-meta';
-    meta.textContent = `${match.points} pts · ${match.date}`;
+    meta.textContent = `${match.points} U · ${match.date}`;
 
     item.appendChild(name);
     item.appendChild(meta);
@@ -455,7 +455,7 @@ function addToJournal() {
   const points = parseFloat(pointsInput.value);
 
   if (isNaN(points)) {
-    showToast('Enter or calculate points first.');
+    showToast('Enter or calculate units first.');
     return;
   }
   if (!selectedMeal) {
@@ -488,7 +488,7 @@ function toggleFavoriteHeart() {
     return;
   }
   if (isNaN(points)) {
-    showToast('Enter or calculate points first.');
+    showToast('Enter or calculate units first.');
     return;
   }
 
@@ -537,7 +537,7 @@ function saveJournalEdit(index) {
     return;
   }
   if (isNaN(points)) {
-    showToast('Enter a valid points value.');
+    showToast('Enter a valid units value.');
     return;
   }
 
@@ -633,7 +633,7 @@ function renderHistory() {
 
     const summarySpan = document.createElement('span');
     summarySpan.className = 'history-day-summary';
-    summarySpan.textContent = `${totalPts} pts`;
+    summarySpan.textContent = `${totalPts} U`;
 
     const chevron = document.createElement('span');
     chevron.className = 'history-day-chevron';
@@ -656,7 +656,7 @@ function renderHistory() {
       const mealNameSpan = document.createElement('span');
       mealNameSpan.textContent = meal;
       const mealPtsSpan = document.createElement('span');
-      mealPtsSpan.textContent = `${mealPts} pts`;
+      mealPtsSpan.textContent = `${mealPts} U`;
       mealHeader.append(mealNameSpan, mealPtsSpan);
       body.appendChild(mealHeader);
 
@@ -670,7 +670,7 @@ function renderHistory() {
 
         const foodPtsSpan = document.createElement('span');
         foodPtsSpan.className = 'history-food-pts';
-        foodPtsSpan.textContent = `${food.points} pts`;
+        foodPtsSpan.textContent = `${food.points} U`;
 
         foodEl.append(foodNameSpan, foodPtsSpan);
         body.appendChild(foodEl);
@@ -725,7 +725,7 @@ function renderJournal() {
     const header = document.createElement('div');
     const mealClass = meal === 'Uncategorized' ? '' : ` meal-${meal.toLowerCase()}`;
     header.className = 'journal-meal-header' + mealClass;
-    header.innerHTML = `<span>${meal}</span><span>${subtotal} pts</span>`;
+    header.innerHTML = `<span>${meal}</span><span>${subtotal} U</span>`;
 
     const body = document.createElement('div');
     body.className = 'journal-meal-body';
@@ -792,7 +792,7 @@ function renderJournal() {
 
       const pointsEl = document.createElement('span');
       pointsEl.className = 'food-points';
-      pointsEl.innerText = `${item.points} pts`;
+      pointsEl.innerText = `${item.points} U`;
 
       info.appendChild(nameEl);
       info.appendChild(pointsEl);
@@ -912,7 +912,7 @@ function renderSavedFoods() {
 
     const pointsEl = document.createElement('span');
     pointsEl.className = 'food-points';
-    pointsEl.innerText = `${food.points} pts`;
+    pointsEl.innerText = `${food.points} U`;
 
     info.appendChild(nameEl);
     info.appendChild(pointsEl);
