@@ -224,7 +224,7 @@ function applyCalculatedAllowance() {
   saveToCloud();
   toggleSettingsMenu();
   switchTab('journal');
-  showToast('Daily allowance set to ' + val + ' U');
+  showToast('Daily allowance set to ' + val + ' Units');
 }
 
 /* ---------- Calculator ---------- */
@@ -356,7 +356,7 @@ function searchHistory(query) {
 
     const meta = document.createElement('div');
     meta.className = 'suggestion-meta';
-    meta.textContent = `${match.points} U · ${match.date}`;
+    meta.textContent = `${match.points} Units · ${match.date}`;
 
     item.appendChild(name);
     item.appendChild(meta);
@@ -633,7 +633,7 @@ function renderHistory() {
 
     const summarySpan = document.createElement('span');
     summarySpan.className = 'history-day-summary';
-    summarySpan.textContent = `${totalPts} U`;
+    summarySpan.textContent = `${totalPts} Units`;
 
     const chevron = document.createElement('span');
     chevron.className = 'history-day-chevron';
@@ -656,7 +656,7 @@ function renderHistory() {
       const mealNameSpan = document.createElement('span');
       mealNameSpan.textContent = meal;
       const mealPtsSpan = document.createElement('span');
-      mealPtsSpan.textContent = `${mealPts} U`;
+      mealPtsSpan.textContent = `${mealPts} Units`;
       mealHeader.append(mealNameSpan, mealPtsSpan);
       body.appendChild(mealHeader);
 
@@ -670,7 +670,7 @@ function renderHistory() {
 
         const foodPtsSpan = document.createElement('span');
         foodPtsSpan.className = 'history-food-pts';
-        foodPtsSpan.textContent = `${food.points} U`;
+        foodPtsSpan.textContent = `${food.points} Units`;
 
         foodEl.append(foodNameSpan, foodPtsSpan);
         body.appendChild(foodEl);
@@ -792,7 +792,7 @@ function renderJournal() {
 
       const pointsEl = document.createElement('span');
       pointsEl.className = 'food-points';
-      pointsEl.innerText = `${item.points} U`;
+      pointsEl.innerText = `${item.points} Units`;
 
       info.appendChild(nameEl);
       info.appendChild(pointsEl);
@@ -912,7 +912,7 @@ function renderSavedFoods() {
 
     const pointsEl = document.createElement('span');
     pointsEl.className = 'food-points';
-    pointsEl.innerText = `${food.points} U`;
+    pointsEl.innerText = `${food.points} Units`;
 
     info.appendChild(nameEl);
     info.appendChild(pointsEl);
