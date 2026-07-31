@@ -742,7 +742,7 @@ button:hover {
   border: 2px solid #4CAF50;
 }
 .calc-result-row input#calcPoints::placeholder {
-  font-size: 11px;
+  font-size: 9px;
   font-weight: normal;
 }
 .calc-result-row input#calcPoints.pulse-glow {
