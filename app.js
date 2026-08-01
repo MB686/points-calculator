@@ -965,6 +965,283 @@ function renderSavedFoods() {
   });
 }
 
+/* ---------- Weight Tracker ---------- */
+
+let editingWeightIndex = null;
+
+function getWeightEntries() {
+  return JSON.parse(localStorage.getItem('wwWeightEntries') || '[]');
+}
+
+function setWeightEntries(entries) {
+  localStorage.setItem('wwWeightEntries', JSON.stringify(entries));
+}
+
+function getWeightUnit() {
+  return localStorage.getItem('wwWeightUnit') || 'lbs';
+}
+
+function setWeightUnit(unit) {
+  localStorage.setItem('wwWeightUnit', unit);
+}
+
+function formatDateISO(d) {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function formatDateDisplay(isoDate) {
+  const [y, m, d] = isoDate.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  return dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function initWeightDate() {
+  const dateInput = document.getElementById('weightDate');
+  if (dateInput && !dateInput.value) {
+    dateInput.value = formatDateISO(new Date());
+  }
+}
+
+function addWeightEntry() {
+  const dateInput = document.getElementById('weightDate');
+  const weightInput = document.getElementById('weightValue');
+  const date = dateInput.value;
+  const weight = parseFloat(weightInput.value);
+
+  if (!date) {
+    showToast('Please enter a date.');
+    return;
+  }
+  if (isNaN(weight) || weight <= 0) {
+    showToast('Please enter a valid weight.');
+    return;
+  }
+
+  const rounded = Math.round(weight * 10) / 10;
+  const entries = getWeightEntries();
+
+  // One entry per day — overwrite if same date exists
+  const existingIndex = entries.findIndex(e => e.date === date);
+  if (existingIndex >= 0) {
+    entries[existingIndex].weight = rounded;
+  } else {
+    entries.push({ date: date, weight: rounded });
+  }
+
+  setWeightEntries(entries);
+  weightInput.value = '';
+  initWeightDate();
+  renderWeightList();
+  saveToCloud();
+}
+
+function editWeightEntry(index) {
+  editingWeightIndex = index;
+  renderWeightList();
+}
+
+function cancelWeightEdit() {
+  editingWeightIndex = null;
+  renderWeightList();
+}
+
+function saveWeightEdit(originalIndex) {
+  const dateInput = document.getElementById('editWeightDate-' + originalIndex);
+  const weightInput = document.getElementById('editWeightValue-' + originalIndex);
+  const newDate = dateInput.value;
+  const newWeight = parseFloat(weightInput.value);
+
+  if (!newDate) {
+    showToast('Please enter a date.');
+    return;
+  }
+  if (isNaN(newWeight) || newWeight <= 0) {
+    showToast('Please enter a valid weight.');
+    return;
+  }
+
+  const entries = getWeightEntries();
+  const originalDate = entries[originalIndex].date;
+
+  // If user changed the date to one that already exists (and it's not the same entry), overwrite
+  if (newDate !== originalDate) {
+    const conflictIndex = entries.findIndex((e, i) => e.date === newDate && i !== originalIndex);
+    if (conflictIndex >= 0) {
+      entries.splice(conflictIndex, 1);
+      if (conflictIndex < originalIndex) {
+        // Adjust index after splice
+        entries[originalIndex - 1] = { date: newDate, weight: Math.round(newWeight * 10) / 10 };
+        setWeightEntries(entries);
+        editingWeightIndex = null;
+        renderWeightList();
+        saveToCloud();
+        return;
+      }
+    }
+  }
+
+  entries[originalIndex] = { date: newDate, weight: Math.round(newWeight * 10) / 10 };
+  setWeightEntries(entries);
+  editingWeightIndex = null;
+  renderWeightList();
+  saveToCloud();
+}
+
+async function deleteWeightEntry(index) {
+  const ok = await showConfirm('Delete this weigh-in?', { title: 'Delete Entry', confirmText: 'Delete', danger: true });
+  if (!ok) return;
+
+  const entries = getWeightEntries();
+  entries.splice(index, 1);
+  setWeightEntries(entries);
+  editingWeightIndex = null;
+  renderWeightList();
+  saveToCloud();
+}
+
+function renderWeightList() {
+  const container = document.getElementById('weightList');
+  const empty = document.getElementById('noWeightEntries');
+  const unitLabel = document.getElementById('weightUnitLabel');
+  if (!container) return;
+
+  const unit = getWeightUnit();
+  if (unitLabel) unitLabel.textContent = unit;
+
+  const entries = getWeightEntries();
+  container.innerHTML = '';
+
+  if (entries.length === 0) {
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Sort chronologically (oldest first) to compute change against first entry
+  const sortedChron = [...entries].sort((a, b) => a.date.localeCompare(b.date));
+  const firstWeight = sortedChron[0].weight;
+
+  // Build display order (most recent first) but preserve original indices for edit/delete
+  const displayEntries = entries.map((e, i) => ({ ...e, originalIndex: i }))
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  displayEntries.forEach(entry => {
+    if (editingWeightIndex === entry.originalIndex) {
+      const editRow = document.createElement('div');
+      editRow.className = 'weight-edit-row';
+
+      const dateInput = document.createElement('input');
+      dateInput.type = 'date';
+      dateInput.id = 'editWeightDate-' + entry.originalIndex;
+      dateInput.value = entry.date;
+
+      const weightInput = document.createElement('input');
+      weightInput.type = 'number';
+      weightInput.step = '0.1';
+      weightInput.id = 'editWeightValue-' + entry.originalIndex;
+      weightInput.value = entry.weight;
+
+      const actions = document.createElement('div');
+      actions.className = 'weight-edit-row-actions';
+
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'weight-save-btn';
+      saveBtn.textContent = 'Save';
+      saveBtn.onclick = () => saveWeightEdit(entry.originalIndex);
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'weight-cancel-btn';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.onclick = () => cancelWeightEdit();
+
+      actions.appendChild(saveBtn);
+      actions.appendChild(cancelBtn);
+
+      editRow.appendChild(dateInput);
+      editRow.appendChild(weightInput);
+      editRow.appendChild(actions);
+      container.appendChild(editRow);
+      return;
+    }
+
+    const row = document.createElement('div');
+    row.className = 'weight-row';
+
+    const dateSpan = document.createElement('span');
+    dateSpan.className = 'weight-row-date';
+    dateSpan.textContent = formatDateDisplay(entry.date);
+
+    const weightSpan = document.createElement('span');
+    weightSpan.className = 'weight-row-weight';
+    weightSpan.textContent = `${entry.weight.toFixed(1)} ${unit}`;
+
+    const changeSpan = document.createElement('span');
+    changeSpan.className = 'weight-row-change';
+
+    // Is this the very first (earliest) entry?
+    if (entry.date === sortedChron[0].date && entry.originalIndex === entries.findIndex(e => e.date === sortedChron[0].date)) {
+      changeSpan.textContent = '—';
+      changeSpan.classList.add('weight-change-none');
+    } else {
+      const diff = entry.weight - firstWeight;
+      const sign = diff > 0 ? '+' : '';
+      changeSpan.textContent = `${sign}${diff.toFixed(1)} ${unit}`;
+      if (diff < 0) changeSpan.classList.add('weight-change-loss');
+      else if (diff > 0) changeSpan.classList.add('weight-change-gain');
+      else changeSpan.classList.add('weight-change-none');
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'weight-row-actions';
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'weight-edit-btn';
+    editBtn.textContent = 'Edit';
+    editBtn.onclick = () => editWeightEntry(entry.originalIndex);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'weight-delete-btn';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.onclick = () => deleteWeightEntry(entry.originalIndex);
+
+    actions.appendChild(editBtn);
+    actions.appendChild(deleteBtn);
+
+    row.appendChild(dateSpan);
+    row.appendChild(weightSpan);
+    row.appendChild(changeSpan);
+    row.appendChild(actions);
+    container.appendChild(row);
+  });
+}
+
+function changeWeightUnit(newUnit) {
+  const currentUnit = getWeightUnit();
+  if (newUnit === currentUnit) return;
+
+  const entries = getWeightEntries();
+  const converted = entries.map(e => {
+    let w = e.weight;
+    if (currentUnit === 'lbs' && newUnit === 'kg') w = w * 0.453592;
+    else if (currentUnit === 'kg' && newUnit === 'lbs') w = w * 2.20462;
+    return { date: e.date, weight: Math.round(w * 10) / 10 };
+  });
+
+  setWeightEntries(converted);
+  setWeightUnit(newUnit);
+  renderWeightList();
+  saveToCloud();
+  showToast(`Weight unit changed to ${newUnit}`);
+}
+
+function updateWeightUnitSelect() {
+  const sel = document.getElementById('weightUnitSelect');
+  if (sel) sel.value = getWeightUnit();
+}
+
 /* ---------- Cloud Sync ---------- */
 
 function getUserDocRef() {
@@ -978,7 +1255,9 @@ function getLocalState() {
     dailyDate: localStorage.getItem('wwDailyDate') || '',
     foodJournal: getJournal(),
     savedFoods: getSavedFoods(),
-    history: getHistory()
+    history: getHistory(),
+    weightEntries: getWeightEntries(),
+    weightUnit: getWeightUnit()
   };
 }
 
@@ -990,11 +1269,15 @@ function applyRemoteState(state) {
   if (state.foodJournal !== undefined) { setJournal(state.foodJournal); editingJournalIndex = null; }
   if (state.savedFoods !== undefined) setSavedFoods(state.savedFoods);
   if (state.history !== undefined) localStorage.setItem('wwHistory', JSON.stringify(state.history));
+  if (state.weightEntries !== undefined) { setWeightEntries(state.weightEntries); editingWeightIndex = null; }
+  if (state.weightUnit !== undefined) setWeightUnit(state.weightUnit);
 
   checkNewDay();
   updateDailyDisplay();
   renderJournal();
   renderSavedFoods();
+  renderWeightList();
+  updateWeightUnitSelect();
 
   isApplyingRemote = false;
 }
@@ -1064,7 +1347,7 @@ function saveToCloud() {
 
 /* ---------- Swipe Navigation ---------- */
 
-const tabOrder = ['calculator', 'journal', 'favorites'];
+const tabOrder = ['calculator', 'journal', 'favorites', 'weight'];
 
 function getCurrentTabIndex() {
   return tabOrder.findIndex(tab =>
@@ -1114,5 +1397,8 @@ function initApp() {
   updateDailyDisplay();
   renderJournal();
   renderSavedFoods();
+  initWeightDate();
+  renderWeightList();
+  updateWeightUnitSelect();
   startSync();
 }

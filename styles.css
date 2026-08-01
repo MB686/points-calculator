@@ -1203,3 +1203,173 @@ button:hover {
     transform: translateX(0);
   }
 }
+
+/* ---------- Weight Tab ---------- */
+.weight-entry-box {
+  width: 92%;
+  margin: 0 auto 16px;
+  padding: 14px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  box-sizing: border-box;
+}
+.weight-entry-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.weight-entry-row label {
+  width: 60px;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #444;
+  flex-shrink: 0;
+}
+.weight-entry-row input {
+  flex: 1;
+  width: auto;
+  margin: 0;
+  padding: 10px;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+.weight-entry-row .ac-unit-label {
+  font-size: 15px;
+  color: #666;
+  flex-shrink: 0;
+  min-width: 30px;
+}
+#weightAddButton {
+  width: 100%;
+  margin: 6px 0 0;
+  padding: 12px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+#weightAddButton:hover {
+  background-color: #45a049;
+}
+.weight-list-box {
+  width: 92%;
+  margin: 0 auto;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 4px 12px;
+  box-sizing: border-box;
+}
+.weight-list-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 0 8px;
+  border-bottom: 2px solid #e0e0e0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.weight-col-date { flex: 1.4; }
+.weight-col-weight { flex: 1.1; text-align: right; }
+.weight-col-change { flex: 1.1; text-align: right; padding-right: 4px; }
+.weight-col-actions { flex: 0 0 90px; }
+.weight-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+}
+.weight-row:last-child { border-bottom: none; }
+.weight-row-date { flex: 1.4; color: #333; }
+.weight-row-weight { flex: 1.1; text-align: right; font-weight: 600; color: #333; }
+.weight-row-change { flex: 1.1; text-align: right; padding-right: 4px; font-weight: 600; }
+.weight-change-loss { color: #4CAF50; }
+.weight-change-gain { color: #e53935; }
+.weight-change-none { color: #999; }
+.weight-row-actions { flex: 0 0 90px; display: flex; gap: 4px; justify-content: flex-end; }
+.weight-row-actions button {
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: white;
+}
+.weight-edit-btn { background-color: #2196F3; }
+.weight-edit-btn:hover { background-color: #1976D2; }
+.weight-delete-btn { background-color: #e53935; }
+.weight-delete-btn:hover { background-color: #c62828; }
+#noWeightEntries {
+  padding: 20px 10px;
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+}
+.weight-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.weight-edit-row input {
+  width: auto;
+  margin: 0;
+  padding: 6px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+.weight-edit-row input[type="date"] { flex: 1.4; }
+.weight-edit-row input[type="number"] { flex: 1.1; }
+.weight-edit-row-actions { flex: 0 0 90px; display: flex; gap: 4px; justify-content: flex-end; }
+.weight-edit-row-actions button {
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: white;
+}
+.weight-save-btn { background-color: #4CAF50; }
+.weight-cancel-btn { background-color: #9e9e9e; }
+
+/* Weight Unit setting in Settings */
+.setting-row-box {
+  width: 92%;
+  margin: 0 auto 12px;
+  padding: 12px 14px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.setting-row-box label {
+  margin: 0;
+  width: auto;
+  font-size: 15px;
+  font-weight: 600;
+  color: #444;
+  flex-shrink: 0;
+}
+.setting-row-box select {
+  flex: 1;
+  padding: 8px;
+  font-size: 15px;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  background-color: white;
+}

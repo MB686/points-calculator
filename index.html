@@ -109,6 +109,16 @@
   </div>
 </div>
 
+<p class="section-label-sm">Weight Unit</p>
+
+<div class="setting-row-box">
+  <label for="weightUnitSelect">Track weight in:</label>
+  <select id="weightUnitSelect" onchange="changeWeightUnit(this.value)">
+    <option value="lbs">Pounds (lbs)</option>
+    <option value="kg">Kilograms (kg)</option>
+  </select>
+</div>
+
 <p class="section-label-sm">Account</p>
 
 <div class="sync-box">
@@ -124,6 +134,7 @@
   <button class="tab-btn active" id="tabBtn-calculator" onclick="switchTab('calculator')">Food Entry</button>
   <button class="tab-btn" id="tabBtn-journal" onclick="switchTab('journal')">Journal</button>
   <button class="tab-btn" id="tabBtn-favorites" onclick="switchTab('favorites')">Favorites</button>
+  <button class="tab-btn" id="tabBtn-weight" onclick="switchTab('weight')">Weight</button>
 </div>
 
 <!-- Food Entry Tab -->
@@ -235,6 +246,37 @@
 
 <div id="savedFoodsList"></div>
 <div id="noSavedFoods">No saved foods yet</div>
+
+</div>
+
+<!-- Weight Tab -->
+<div class="tab-panel" id="tabPanel-weight">
+
+<h2>Weight Tracker</h2>
+
+<div class="weight-entry-box">
+  <div class="weight-entry-row">
+    <label for="weightDate">Date:</label>
+    <input type="date" id="weightDate">
+  </div>
+  <div class="weight-entry-row">
+    <label for="weightValue">Weight:</label>
+    <input type="number" id="weightValue" step="0.1" placeholder="e.g. 185.2">
+    <span class="ac-unit-label" id="weightUnitLabel">lbs</span>
+  </div>
+  <button id="weightAddButton" onclick="addWeightEntry()">Add Weigh-In</button>
+</div>
+
+<div class="weight-list-box">
+  <div class="weight-list-header">
+    <span class="weight-col-date">Date</span>
+    <span class="weight-col-weight">Weight</span>
+    <span class="weight-col-change">Change</span>
+    <span class="weight-col-actions"></span>
+  </div>
+  <div id="weightList"></div>
+  <div id="noWeightEntries">No weight entries yet. Add your first weigh-in to start tracking.</div>
+</div>
 
 </div>
 
