@@ -725,7 +725,7 @@ function renderJournal() {
     const header = document.createElement('div');
     const mealClass = meal === 'Uncategorized' ? '' : ` meal-${meal.toLowerCase()}`;
     header.className = 'journal-meal-header' + mealClass;
-    header.innerHTML = `<span>${meal}</span><span>${subtotal} U</span>`;
+    header.innerHTML = `<span>${meal}</span><span>${subtotal} Units</span>`;
 
     const body = document.createElement('div');
     body.className = 'journal-meal-body';
@@ -838,6 +838,7 @@ document.getElementById('calcPoints').addEventListener('input', resetFavoriteHea
 /* ---------- Saved Foods (favorites) ---------- */
 
 let choosingMealForSavedFoodIndex = null;
+let editingSavedFoodIndex = null;
 const mealCategories = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
 
 function getSavedFoods() {
@@ -852,12 +853,49 @@ function setSavedFoods(foods) {
 
 function askSavedFoodMeal(index) {
   choosingMealForSavedFoodIndex = index;
+  editingSavedFoodIndex = null;
   renderSavedFoods();
 }
 
 function cancelSavedFoodMealChoice() {
   choosingMealForSavedFoodIndex = null;
   renderSavedFoods();
+}
+
+function editSavedFood(index) {
+  editingSavedFoodIndex = index;
+  choosingMealForSavedFoodIndex = null;
+  renderSavedFoods();
+}
+
+function cancelSavedFoodEdit() {
+  editingSavedFoodIndex = null;
+  renderSavedFoods();
+}
+
+function saveSavedFoodEdit(index) {
+  const nameInput = document.getElementById('editSavedFoodName-' + index);
+  const pointsInput = document.getElementById('editSavedFoodPoints-' + index);
+
+  const name = nameInput.value.trim();
+  const points = parseFloat(pointsInput.value);
+
+  if (!name) {
+    showToast('Enter a food name.');
+    return;
+  }
+  if (isNaN(points)) {
+    showToast('Enter a valid units value.');
+    return;
+  }
+
+  const foods = getSavedFoods();
+  foods[index] = { name: name, points: points };
+  setSavedFoods(foods);
+
+  editingSavedFoodIndex = null;
+  renderSavedFoods();
+  saveToCloud();
 }
 
 function addSavedFood(index, meal) {
@@ -900,6 +938,50 @@ function renderSavedFoods() {
   emptyMessage.style.display = 'none';
 
   foods.forEach((food, index) => {
+    // Edit mode — show inline edit row instead of normal row
+    if (editingSavedFoodIndex === index) {
+      const editRow = document.createElement('div');
+      editRow.className = 'edit-row';
+
+      const inputsRow = document.createElement('div');
+      inputsRow.className = 'edit-row-inputs';
+
+      const nameInput = document.createElement('input');
+      nameInput.className = 'edit-name-input';
+      nameInput.id = 'editSavedFoodName-' + index;
+      nameInput.type = 'text';
+      nameInput.value = food.name;
+
+      const pointsInput = document.createElement('input');
+      pointsInput.className = 'edit-points-input';
+      pointsInput.id = 'editSavedFoodPoints-' + index;
+      pointsInput.type = 'number';
+      pointsInput.value = food.points;
+
+      inputsRow.appendChild(nameInput);
+      inputsRow.appendChild(pointsInput);
+
+      const actionsRow = document.createElement('div');
+      actionsRow.className = 'edit-row-actions';
+
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'save-edit-btn';
+      saveBtn.innerText = 'Save';
+      saveBtn.onclick = () => saveSavedFoodEdit(index);
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'cancel-edit-btn';
+      cancelBtn.innerText = 'Cancel';
+      cancelBtn.onclick = () => cancelSavedFoodEdit();
+
+      actionsRow.appendChild(saveBtn);
+      actionsRow.appendChild(cancelBtn);
+      editRow.appendChild(inputsRow);
+      editRow.appendChild(actionsRow);
+      container.appendChild(editRow);
+      return;
+    }
+
     const item = document.createElement('div');
     item.className = 'food-list-item';
 
@@ -925,12 +1007,18 @@ function renderSavedFoods() {
     addBtn.innerText = 'Add';
     addBtn.onclick = () => askSavedFoodMeal(index);
 
+    const editBtn = document.createElement('button');
+    editBtn.className = 'edit-food-btn';
+    editBtn.innerText = 'Edit';
+    editBtn.onclick = () => editSavedFood(index);
+
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'delete-food-btn';
     deleteBtn.innerText = 'Delete';
     deleteBtn.onclick = () => deleteSavedFood(index);
 
     actions.appendChild(addBtn);
+    actions.appendChild(editBtn);
     actions.appendChild(deleteBtn);
 
     item.appendChild(info);
@@ -1267,7 +1355,7 @@ function applyRemoteState(state) {
   if (state.allowance !== undefined) localStorage.setItem('wwDailyAllowance', state.allowance);
   if (state.dailyDate !== undefined) localStorage.setItem('wwDailyDate', state.dailyDate);
   if (state.foodJournal !== undefined) { setJournal(state.foodJournal); editingJournalIndex = null; }
-  if (state.savedFoods !== undefined) setSavedFoods(state.savedFoods);
+  if (state.savedFoods !== undefined) { setSavedFoods(state.savedFoods); editingSavedFoodIndex = null; }
   if (state.history !== undefined) localStorage.setItem('wwHistory', JSON.stringify(state.history));
   if (state.weightEntries !== undefined) { setWeightEntries(state.weightEntries); editingWeightIndex = null; }
   if (state.weightUnit !== undefined) setWeightUnit(state.weightUnit);
