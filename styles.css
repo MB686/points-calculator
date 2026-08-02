@@ -1375,3 +1375,16 @@ button:hover {
   border-radius: 6px;
   background-color: white;
 }
+
+/* ---------- Icon-only action buttons (used in Favorites) ---------- */
+.icon-btn {
+  padding: 6px 8px !important;
+  min-width: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-btn svg {
+  display: block;
+  pointer-events: none;
+}
